@@ -43,19 +43,40 @@
     button.focus();
   };
 
-  if (login) {
+  close.addEventListener('click', closeInfo);
+  document.addEventListener('keydown', event => {
+    if(event.key === 'Escape' && !panel.hidden) closeInfo();
+  });
+  const standby = () => {
+    // Clickable status, no fake login attempt or public-portal bypass.
+    status.classList.remove('is-ready');
+    button.disabled = false;
+    message.textContent = 'Google Workspace sign-in is not connected yet. Select the button for details.';
+    button.addEventListener('click', openInfo);
+  };
+  const ip = config.identityPlatform || {};
+  const f = ip.firebase || {};
+  const configured = ip.enabled === true &&
+    /^saml\.[a-zA-Z0-9_.-]+$/.test(ip.providerId || '') &&
+    [f.apiKey,f.authDomain,f.projectId,f.appId].every(v=>typeof v === 'string' && v.length > 5 && !v.includes('REPLACE_ME')) &&
+    window.location.protocol === 'https:';
+  if (configured) {
+    // Requires the same-origin Cloud Run /auth/session endpoint to actually work.
+    button.disabled = true;
+    message.textContent = 'Initializing secure sign-in…';
+    import('./identity-platform.js')
+      .then(({wireSaml})=>wireSaml({config:ip,button,status,message}))
+      .catch(()=>{
+        message.textContent = 'Unable to start Identity Platform authentication. Contact your administrator.';
+        button.disabled = false;
+        button.addEventListener('click', openInfo);
+      });
+  } else if (login) {
+    // Legacy custom-SP alternative, only when deliberately configured.
     status.classList.add('is-ready');
     message.textContent = 'Google Workspace single sign-on is available. Use your approved organization account.';
     button.addEventListener('click', () => window.location.assign(login));
-    panel.hidden = true;
   } else {
-    // The button remains keyboard/mouse/touch clickable so it can explain why
-    // login is unavailable. It does NOT attempt a login or grant access.
-    message.textContent = 'Google Workspace sign-in is not connected yet. Select the button for details.';
-    button.addEventListener('click', openInfo);
-    close.addEventListener('click', closeInfo);
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && !panel.hidden) closeInfo();
-    });
+    standby();
   }
 })();
