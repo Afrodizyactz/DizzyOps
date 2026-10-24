@@ -1,0 +1,13 @@
+{
+  "identity_provider": "Google Workspace SAML 2.0",
+  "entity_id": "https://accounts.google.com/o/saml2?idpid=C03icveqq",
+  "sso_url": "https://accounts.google.com/o/saml2/idp?idpid=C03icveqq",
+  "name_id_format": "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+  "signing_certificate": "./google-idp-signing-2026.pem",
+  "certificate_sha256": "CB:D8:53:3B:CA:C5:38:10:BF:B4:6C:49:50:48:47:8B:0C:CA:79:43:33:05:D2:27:DE:07:9D:45:F2:64:23:63",
+  "certificate_not_before": "2026-10-24T22:51:50Z",
+  "certificate_not_after": "2031-10-23T22:51:50Z",
+  "service_provider_entity_id": null,
+  "assertion_consumer_service_url": null,
+  "status": "awaiting service provider setup; not enabled"
+}
