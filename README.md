@@ -2,15 +2,20 @@
 
 AfrodizzyActs operations portal.
 
-Live preview: https://afrodizzyacts.github.io/DizzyOps/
+## Entry points
 
-The initial frontend contains navigation and empty operational modules. Database persistence and external integrations are not enabled. GitHub Pages is a **public preview, not a protected business application**.
+- **Login landing page:** https://afrodizzyacts.github.io/DizzyOps/ (GitHub Pages staging)
+- **Planned production domain:** https://ops.afrodizzyacts.co.za/ (DNS and secure identity hosting not yet configured)
+- **Operations UI preview:** https://afrodizzyacts.github.io/DizzyOps/portal.html (public development preview only, no protected data)
 
-## Google Workspace SAML SSO (configuration staged)
+The default `index.html` is the branded mobile-first Google Workspace sign-in page. The original operations workspace is preserved in `portal.html` for design and workflow review.
 
-A new Google Workspace IdP signing certificate (valid until 23 October 2031), IdP metadata and safe disabled login entry are staged on a feature branch. **Actual sign-in is NOT live** until the SAML service provider and secure session/data API are deployed, Google Workspace ACS and entity ID are configured, and end-to-end testing is complete.
+**SSO is not live.** The sign-in button remains disabled until the approved Google Workspace SAML service provider, same-origin `/auth/saml/login` endpoint, verified backend sessions, and server-side authorization are deployed and tested. A public static page or custom domain is not an authentication boundary.
 
-- [SSO integration architecture and setup](docs/google-workspace-sso.md)
-- [Google Workspace post-job workflow integration](docs/post-job-google-workspace-integration.md)
+The development preview does not connect production records, database persistence, or external integrations. Do not enter personal, customer, performer, payroll, or sensitive business data into GitHub Pages.
 
-Do not store production customer or performer data in the browser-only quotation UI or public repository.
+## Documentation
+
+- [Login landing, custom domain and deployment gates](docs/login-landing-and-domain.md)
+- [Google Workspace SAML SSO](docs/google-workspace-sso.md)
+- [Post-job Google Workspace integration](docs/post-job-google-workspace-integration.md)
