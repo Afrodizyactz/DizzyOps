@@ -1,38 +1,69 @@
-# DizzyOps — Mandatory Google Workspace SSO
+# DizzyOps — Google Workspace SAML 2.0 single sign-on
 
-## Security requirement
+## Status (25 October 2026)
+**IdP settings staged; authentication NOT deployed or enabled.** The GitHub Pages application is a public preview. A SAML assertion cannot be validated or used as an authenticated session solely by `index.html`. Until the production backend or managed identity platform is deployed, neither the client interface nor its navigation is an access-control boundary. Do not connect sensitive records or production APIs to this preview.
 
-Google Workspace single sign-on is required before DizzyOps is used with production data. The GitHub Pages frontend is currently a public UI preview and must not be treated as an authenticated application.
+## Google Workspace IdP settings — verified certificate
 
-## Proposed architecture
+| Setting | Value |
+| --- | --- |
+| IdP entity ID / issuer | `https://accounts.google.com/o/saml2?idpid=C03icveqq` |
+| IdP SSO URL | `https://accounts.google.com/o/saml2/idp?idpid=C03icveqq` |
+| Binding | HTTP-Redirect (AuthnRequest), HTTP-POST (SAML Response), according to supported SP configuration |
+| NameID format | `urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress` |
+| IdP public signing certificate | `auth/google-idp-signing-2026.pem` |
+| Current IdP metadata generated for integration | `auth/google-idp-metadata.xml` |
+| Public certificate SHA-256 fingerprint | `CB:D8:53:3B:CA:C5:38:10:BF:B4:6C:49:50:48:47:8B:0C:CA:79:43:33:05:D2:27:DE:07:9D:45:F2:64:23:63` |
+| Certificate valid from | 2026-10-24T22:51:50Z |
+| Certificate valid until | 2031-10-23T22:51:50Z |
 
-- Identity provider: Google Workspace / Google Identity Services (OpenID Connect).
-- Sign-in: Authorization Code Flow with PKCE, initiated by a confidential backend-for-frontend (BFF).
-- Hosting: Google Cloud Run for the backend; GitHub Pages may continue hosting the public static frontend only while all protected data and API operations are served by the authenticated backend. Prefer serving both frontend and backend under a unified application origin for production.
-- Session: backend-managed HttpOnly, Secure, SameSite cookies; server-side session invalidation on sign-out; CSRF protection and session rotation.
-- Validation: verify Google ID token issuer, audience, signature, expiry, and hosted domain where applicable; also check an explicit approved-user/role registry. Email domain alone is insufficient for authorization.
-- Authorization: deny-by-default RBAC for management, administrators, agents, performers, contractors, and suppliers; enforce authorization on every API request.
-- Account menu: show verified name, email, photo and roles only from backend session data; Profile, Settings, Support and Sign Out require appropriate session checks.
-- Logout: revoke/invalidate the DizzyOps session. Do not claim to log users out of their entire Google account.
-- Secrets: Google OAuth client secret, signing keys and service account credentials stay in Google Secret Manager or equivalent backend configuration, never in the GitHub Pages JavaScript bundle.
-- Audit: record sign-ins, role changes, and privileged actions without logging access tokens or sensitive personal data.
-- POPIA: least-privilege access, retention policies, access logging and documented lawful processing.
+The original uploaded `GoogleIDPMetadata.xml` carries an **expired 11 March 2026 certificate**. Do not import that old XML as the live IdP metadata. The `auth/google-idp-metadata.xml` file in this feature branch contains the replacement public certificate. The metadata was reconstructed from the supplied SSO URL, IdP issuer, and certificate; confirm these IdP details in the Google Admin console before production use.
 
-## Prerequisites
+This is an X.509 *public certificate*, not a private key. Publishing the public IdP signing certificate is acceptable; private keys and session secrets must stay in managed secret storage.
 
-1. Google Cloud project under an authorized AfrodizzyActs-controlled account.
-2. Authorized Google Workspace administrator approval and OAuth consent configuration.
-3. OAuth client ID and backend-held client secret with exact authorized redirect URIs.
-4. Approved user/role assignments and policy for external performers/contractors (who may not have Workspace accounts).
-5. Backend domain, session storage, and production data service.
+## Service provider (SP) configuration remains required
 
-## Acceptance criteria
+An approved AfrodizzyActs Google Workspace administrator must configure **Apps → Web and mobile apps → Add custom SAML app**, or update the existing DizzyOps SAML app. These **SP-specific** values are *not* provided by the uploaded Google IdP certificate:
 
-- Anonymous visitors cannot retrieve protected business records or call protected APIs.
-- Authorized Workspace users can sign in and see their own profile.
-- Unauthorized Google accounts, including accounts from the same domain not explicitly approved, are denied.
-- Roles are checked on the server for each protected action.
-- Expired sessions and sign-out deny subsequent protected requests.
-- Mobile and desktop login and logout flows pass end-to-end testing.
+1. **ACS URL**: the exact HTTPS endpoint that safely receives the SAML response from Google. It must be generated by the deployed SP; it cannot be `https://afrodizzyacts.github.io/DizzyOps/`.
+2. **SP entity ID / audience**: the exact identifier configured in the deployed SP.
+3. **Start URL** (optional): the secure application entry point, preferably on a controlled AfrodizzyActs application domain.
+4. **NameID / attribute mapping**: email address as NameID; map minimum required attributes only.
+5. **User access assignment**: enable the SAML app only for the intended Workspace users/groups or organizational units.
 
-**Status:** Architecture requirement documented. SSO is NOT yet configured or deployed.
+### Recommended hosting architecture
+
+**Preferred Google Cloud option:** Google Cloud **Identity Platform** acts as a managed SAML SP, with Google Workspace as the IdP. Identity Platform supplies an SP entity ID and hosted **ACS callback URL** (typically `https://PROJECT_ID.firebaseapp.com/__/auth/handler`; use the exact value generated in the console, not this template). Register those exact values in Google Workspace. The frontend then uses Identity Platform/Firebase Authentication to obtain a managed login session. Every protected Cloud Run API must independently verify the issued ID token, approved identity, and authorization. A static site must never infer access solely from client-side flags.
+
+**Alternative:** Deploy a confidential SAML SP/backend-for-frontend (BFF) on Google Cloud Run and ideally serve the portal under the same HTTPS origin. The SP owns the ACS, session cookies, authorization, and protected data API. Set `auth/config.js` `loginUrl` to the service provider's **SP-initiated login** URL only after the SP has been tested. The login button must not navigate straight to the Google IdP SSO URL.
+
+Never expose a SAML signing private key or session secret in GitHub Pages, JavaScript, or public GitHub settings. If a custom SP requires signed AuthnRequests, keep that signing private key in Secret Manager and coordinate the matching SP public certificate with the Workspace admin.
+
+## Authentication and authorization requirements
+
+- Validate XML signatures using the trusted IdP signing certificate with a mature SAML library (never parse untrusted XML without hardened validation).
+- Verify response and assertion issuer, audience, destination/recipient, InResponseTo, time validity (including NotBefore/NotOnOrAfter), subject confirmation, and replay protection; protect against XML signature wrapping and unsolicited SAML responses.
+- Restrict accepted identities to explicitly approved accounts and server-side role assignments; a matching email domain is **not** sufficient.
+- For a custom SP, issue Secure, HttpOnly, appropriately scoped SameSite cookies, rotate sessions on login, prevent CSRF, and invalidate the server-side session on logout. Avoid storing tokens in localStorage.
+- Enforce deny-by-default RBAC/ABAC on each protected API request; roles may include management, administrator, agent, performer, contractor, and supplier, with separate onboarding controls for users without Workspace accounts.
+- Maintain audit records for privileged operations; require MFA via Workspace policy; use POPIA-aligned data handling, retention, and logging. Never log SAML responses, tokens, or confidential profile attributes unnecessarily.
+- Google Workspace authentication does **not** by itself authorize Gmail, Drive, or Calendar APIs. Those integrations need separate, scoped delegated consent/service identity and audit logging.
+
+## Frontend integration in this branch
+
+`index.html` loads `auth/config.js` and displays an accessible Google Workspace login entry on the Login page. `enabled` defaults to **false** and the button is deliberately disabled until the secure SP login endpoint exists. Enabling the frontend button is **not** sufficient for production: backend session verification and route/API protection must be tested first.
+
+## Production acceptance tests
+
+1. Exact IdP X.509 certificate and fingerprint are verified against the Admin console; the old expired certificate is removed or handled in a planned rollover.
+2. Successful SP-initiated login redirects to Google and returns to the SP ACS (never a public static HTML route).
+3. Invalid signatures, altered assertions, wrong audience, replayed assertions, expired assertions, and unexpected identities are rejected.
+4. Only explicitly assigned Workspace users gain access; server-side roles protect jobs, quotes, performers, payroll, and finances.
+5. Sign-out and expiration invalidate access; incognito and mobile/desktop flows work.
+6. No sample data, private keys, access tokens, or confidential business records are published in the public repository or static site.
+
+## References
+
+- [Google Cloud Identity Platform: SAML sign-in](https://cloud.google.com/identity-platform/docs/web/saml)
+- [Identity Platform: configure SAML providers](https://cloud.google.com/identity-platform/docs/managing-providers-programmatically)
+- [Google Admin help: custom SAML applications](https://support.google.com/a/answer/6087519)
