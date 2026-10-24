@@ -13,7 +13,9 @@ The root `index.html` is now a dedicated, branded, responsive sign-in page for D
 
 ## Google SAML sign-in wiring
 
-The root page loads `auth/config.js`, then `auth/login.js`. Sign-in remains disabled by default. The login button is enabled only if:
+The root page loads `auth/config.js`, then `auth/login.js`. The **button is always clickable**: while SAML is not configured, clicking it opens an accessible setup-status panel and does not authenticate the visitor. When the production SAML endpoint is configured, clicking it redirects to that service. An unconfigured account cannot gain access to protected records from this interaction.
+
+An actual SAML authentication redirect happens only if:
 
 1. `enabled: true` is explicitly set in `auth/config.js`.
 2. The page is served over HTTPS.
@@ -21,7 +23,7 @@ The root page loads `auth/config.js`, then `auth/login.js`. Sign-in remains disa
 
 A custom SAML service provider/backend (SP) must implement this endpoint. It should initiate a signed or unsigned SAML authentication request as supported by the configured IdP, receive and validate Google's SAML response at its secure ACS, establish a server-side session, and redirect authenticated users into a **protected** application served through the same trusted origin. Validate issuer, signature, audience, InResponseTo, timestamps, recipient/destination, replay protection and explicitly approved user/role assignments. A landing page redirect alone is never proof of authentication.
 
-This branch intentionally does not enable real sign-in because neither the Cloud Run SP nor the Cloud Identity Platform callback, protected data APIs, and server-side user authorization have been provisioned. Do not change the flag merely to make the button clickable.
+This configuration intentionally does not enable real sign-in because neither the Cloud Run SP nor the Cloud Identity Platform callback, protected data APIs, and server-side user authorization have been provisioned. Do not change the flag merely to make the button clickable.
 
 **Identity Platform alternative:** if the production team selects Google Cloud Identity Platform as managed SAML SP, implement its client and backend token-verification flow instead of setting `/auth/saml/login` without a corresponding service. The rest of the landing-page design can be retained.
 

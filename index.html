@@ -47,6 +47,13 @@
     .signin-btn svg{width:21px;height:21px;flex-shrink:0}
     .signin-btn:not(:disabled):hover{background:white;transform:translateY(-2px);box-shadow:0 10px 30px #0009}
     .signin-btn:disabled{cursor:not-allowed;opacity:.63}
+    .signin-help-panel{margin-top:20px;padding:22px;background:#1d1c20;border:1px solid #474148;border-left:3px solid #e7434c;border-radius:12px;color:#d9d7dc}
+    .signin-help-panel[hidden]{display:none}
+    .signin-help-panel h3{font-size:16px;line-height:1.4;margin:0 0 10px;font-family:Manrope,"DM Sans",sans-serif}
+    .signin-help-panel p{font-size:13px;line-height:1.7;color:#bfbcc3;margin:0 0 12px}
+    .signin-help-panel a{color:#fff;text-underline-offset:4px}
+    .signin-help-close{background:transparent;border:1px solid #66616a;color:#f4f4f4;padding:10px 14px;border-radius:8px;margin-top:6px;min-height:44px}
+    .signin-help-close:hover{border-color:#f17c82;background:#312329}
     .sso-caption{margin:17px 0 0;color:#85858e;font-size:13px;line-height:1.65;text-align:center}
     .status{display:flex;align-items:flex-start;gap:12px;margin:35px 0 0;padding:17px 18px;border:1px solid #393034;border-radius:12px;background:#20191c;color:#c4bbc0;font-size:13px;line-height:1.65}
     .status-dot{width:9px;height:9px;min-width:9px;border-radius:50%;margin-top:6px;background:#eb8085;box-shadow:0 0 0 4px #eb808515}
@@ -113,7 +120,7 @@
         <p class="brand-tag"><span class="brand-mark" aria-hidden="true"></span> AfrodizzyActs workspace</p>
         <h2>Welcome to DizzyOps.</h2>
         <p class="subheading">Sign in with your approved Google Workspace account to access the AfrodizzyActs operations portal.</p>
-        <button class="signin-btn" id="google-signin" type="button" disabled aria-describedby="signin-help">
+        <button class="signin-btn" id="google-signin" type="button" aria-describedby="signin-help">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path fill="#4285F4" d="M21.35 12.24c0-.76-.06-1.32-.2-1.9H12v3.57h5.37a4.6 4.6 0 0 1-2 3.03v2.47h3.2c1.87-1.72 2.78-4.25 2.78-7.17Z"/>
             <path fill="#34A853" d="M12 21.75c2.66 0 4.9-.88 6.53-2.34l-3.2-2.47c-.88.6-2 .95-3.33.95-2.57 0-4.76-1.74-5.54-4.08h-3.3v2.55A9.87 9.87 0 0 0 12 21.75Z"/>
@@ -127,6 +134,13 @@
           <span class="status-dot" aria-hidden="true"></span>
           <span id="auth-status-text">Secure sign-in is being configured by your administrator. Access will be enabled once the identity service is ready.</span>
         </div>
+        <section class="signin-help-panel" id="signin-help-panel" aria-labelledby="signin-help-title" tabindex="-1" hidden>
+          <h3 id="signin-help-title">Google Workspace sign-in is not active yet</h3>
+          <p>Your administrator has supplied Google's identity provider certificate, but the DizzyOps secure login service is still being configured. No sign-in attempt has been made.</p>
+          <p>An administrator must finish the SAML service provider, ACS callback and user access configuration before anyone can log in. Do not enter your Google password directly into DizzyOps.</p>
+          <p><a href="https://github.com/AfrodizzyActs/DizzyOps/blob/main/docs/google-workspace-sso.md" target="_blank" rel="noopener noreferrer">SSO setup guidance for administrators</a></p>
+          <button class="signin-help-close" id="signin-help-close" type="button">Close</button>
+        </section>
         <div class="assist">
           <strong>Need access?</strong>
           <p>Contact your AfrodizzyActs administrator to request an account or confirm your permissions.</p>
