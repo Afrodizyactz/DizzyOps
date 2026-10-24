@@ -31,15 +31,31 @@
     login = null;
   }
 
+  const panel = document.getElementById('signin-help-panel');
+  const close = document.getElementById('signin-help-close');
+  const openInfo = () => {
+    panel.hidden = false;
+    message.textContent = 'Google Workspace SSO is not connected. The next setup steps are shown below.';
+    panel.focus();
+  };
+  const closeInfo = () => {
+    panel.hidden = true;
+    button.focus();
+  };
+
   if (login) {
-    button.disabled = false;
     status.classList.add('is-ready');
     message.textContent = 'Google Workspace single sign-on is available. Use your approved organization account.';
-    button.addEventListener('click', () => {
-      window.location.assign(login);
-    });
+    button.addEventListener('click', () => window.location.assign(login));
+    panel.hidden = true;
   } else {
-    button.disabled = true;
-    message.textContent = 'Secure sign-in is being configured by your administrator. Access will be enabled once the identity service is ready.';
+    // The button remains keyboard/mouse/touch clickable so it can explain why
+    // login is unavailable. It does NOT attempt a login or grant access.
+    message.textContent = 'Google Workspace sign-in is not connected yet. Select the button for details.';
+    button.addEventListener('click', openInfo);
+    close.addEventListener('click', closeInfo);
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !panel.hidden) closeInfo();
+    });
   }
 })();
