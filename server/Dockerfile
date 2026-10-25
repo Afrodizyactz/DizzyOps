@@ -5,7 +5,7 @@ COPY server/package*.json ./server/
 RUN cd server && npm install --omit=dev --no-audit --no-fund && npm cache clean --force
 COPY server/index.js ./server/index.js
 COPY index.html ./index.html
-COPY portal.html ./portal.html
+COPY portal.html portal-app.js ./
 COPY assets/ ./assets/
 COPY auth/config.js auth/login.js auth/identity-platform.js ./auth/
 COPY quotes.js finance.js ./
