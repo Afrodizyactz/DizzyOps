@@ -1,0 +1,35 @@
+name: SAML authentication readiness checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'auth/**'
+      - 'server/**'
+      - 'portal.html'
+      - 'portal-app.js'
+      - '.github/workflows/auth-checks.yml'
+  pull_request:
+    paths:
+      - 'auth/**'
+      - 'server/**'
+      - 'portal.html'
+      - 'portal-app.js'
+      - '.github/workflows/auth-checks.yml'
+permissions:
+  contents: read
+jobs:
+  auth-source-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Parse authentication and portal scripts
+        run: |
+          node --check server/index.js
+          node --check auth/login.js
+          node --check auth/identity-platform.js
+          node --check portal-app.js
+      - name: Verify certificate and fail-closed auth settings
+        run: npm test --prefix server
