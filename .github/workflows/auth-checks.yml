@@ -9,6 +9,9 @@ on:
       - 'portal-app.js'
       - 'portal-routes.js'
       - 'portal-ui.css'
+      - 'operations-ui.css'
+      - 'operations-schema.js'
+      - 'operations-ui.js'
       - 'quotes.js'
       - 'finance.js'
       - 'sage-readiness.js'
@@ -22,6 +25,9 @@ on:
       - 'portal-app.js'
       - 'portal-routes.js'
       - 'portal-ui.css'
+      - 'operations-ui.css'
+      - 'operations-schema.js'
+      - 'operations-ui.js'
       - 'quotes.js'
       - 'finance.js'
       - 'sage-readiness.js'
@@ -47,8 +53,13 @@ jobs:
           node --check quotes.js
           node --check finance.js
           node --check sage-readiness.js
+          node --check operations-schema.js
+          node --check operations-ui.js
       - name: Verify certificate and fail-closed auth settings
         run: npm test --prefix server
 
       - name: Test portal routing and protected module wiring
         run: node --test test/portal-routing.test.cjs
+
+      - name: Validate operational schemas and backend safety gates
+        run: node --test test/operational-workspaces.test.cjs
