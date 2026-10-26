@@ -1,0 +1,12 @@
+**/.git
+**/node_modules
+**/.DS_Store
+**/.env
+**/*.pem
+**/service-account*.json
+**/firebase-adminsdk*.json
+**/*.zip
+docs/
+test/
+.github/
+README.md
