@@ -66,6 +66,8 @@ jobs:
           node --check server/business-policy.js
           node --check server/business-contract.js
           node --check server/business-api.js
+          bash -n infra/prepare-cloud.sh
+          bash -n infra/deploy-cloud-run.sh
       - name: Verify certificate and fail-closed auth settings
         run: npm test --prefix server
 
