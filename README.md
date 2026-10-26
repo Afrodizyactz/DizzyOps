@@ -19,3 +19,7 @@ The development preview does not connect production records, database persistenc
 - [Login landing, custom domain and deployment gates](docs/login-landing-and-domain.md)
 - [Google Workspace SAML SSO](docs/google-workspace-sso.md)
 - [Post-job Google Workspace integration](docs/post-job-google-workspace-integration.md)
+
+## Phase 01 navigation and financial module previews
+
+DizzyOps now includes a shared route registry, improved responsive mobile navigation and linked Quotes, Finance and Sage UI modules. Financial draft forms remain available only to verified staff on a protected host; **there is no live database or Sage sync**. The public GitHub Pages portal is a design preview and cannot protect real data. See [Phase 01 acceptance checks](docs/phase-01-navigation.md).
