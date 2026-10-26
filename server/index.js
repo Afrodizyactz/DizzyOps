@@ -1,7 +1,7 @@
 /**
  * DizzyOps Cloud Run authentication boundary.
  * Identity Platform performs SAML validation; Firebase Admin verifies ID/session tokens.
- * No production business records are hosted or persisted by this service.
+ * When explicitly activated, operational records persist in Firestore with audited writes.
  */
 import express from 'express';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
@@ -9,6 +9,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { initializeApp, applicationDefault } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
+import { createBusinessRouter } from './business-api.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const app = express();
@@ -32,12 +34,32 @@ const allowedRoles = Object.fromEntries(Object.entries(staff).map(([email, role]
   if (!id.includes('@') || !roles.has(role)) throw new Error('Invalid authorized staff mapping');
   return [id, role];
 }));
-initializeApp({ credential: applicationDefault(), projectId });
-const auth = getAuth();
+const firebaseApp=initializeApp({ credential: applicationDefault(), projectId });
+const auth = getAuth(firebaseApp);
+const businessEnabled=process.env.BUSINESS_API_ENABLED==='true';
+const identityEnabled=process.env.IDENTITY_PLATFORM_ENABLED==='true';
+const dbId=process.env.FIRESTORE_DATABASE_ID||'(default)';
+const publicIdentity={
+  providerId:samlProviderId,
+  firebase:{apiKey:process.env.FIREBASE_API_KEY||'',authDomain:process.env.FIREBASE_AUTH_DOMAIN||'',
+    projectId,appId:process.env.FIREBASE_APP_ID||''}
+};
+if(identityEnabled){
+  if(!['FIREBASE_API_KEY','FIREBASE_AUTH_DOMAIN','FIREBASE_APP_ID'].every(k=>
+    typeof process.env[k]==='string'&&process.env[k].length>5&&!process.env[k].includes('REPLACE_ME'))){
+    throw Error('Identity Platform public identifiers must be configured before enabling SAML');
+  }
+  if(!/^[a-zA-Z0-9.-]+\.firebaseapp\.com$/.test(process.env.FIREBASE_AUTH_DOMAIN)){
+    throw Error('Firebase authentication domain is not verified');
+  }
+}
+if(businessEnabled&&!identityEnabled)throw Error('Business APIs require verified Identity Platform');
+const db=businessEnabled?getFirestore(firebaseApp,dbId):null;
+
 
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
-app.use(express.json({limit:'8kb',type:'application/json'}));
+app.use(express.json({limit:'32kb',type:'application/json'}));
 app.use((req,res,next) => {
   res.set({
     'X-Content-Type-Options':'nosniff',
@@ -104,7 +126,19 @@ async function session(req,res,next){
 app.get('/healthz',(req,res)=>res.json({status:'ok'}));
 app.get(['/', '/index.html'],(req,res)=>file(res,'index.html'));
 app.use('/assets',express.static(path.join(root,'assets'),{fallthrough:false,maxAge:'1h'}));
-for(const part of ['config.js','login.js','identity-platform.js']){
+// Runtime configuration contains public Firebase client identifiers only.
+ // The committed GitHub Pages config remains disabled regardless of Cloud Run state.
+app.get('/auth/config.js',(req,res)=>{
+  noCache(res);
+  const config={
+    enabled:false,loginUrl:'',
+    identityPlatform:{enabled:identityEnabled,providerId:samlProviderId,
+      firebase:identityEnabled?publicIdentity.firebase:{apiKey:'REPLACE_ME',authDomain:'REPLACE_ME',
+        projectId:'REPLACE_ME',appId:'REPLACE_ME'}}
+  };
+  res.type('application/javascript').send('window.DIZZYOPS_AUTH_CONFIG = Object.freeze('+JSON.stringify(config)+');');
+});
+for(const part of ['login.js','identity-platform.js']){
   app.get('/auth/'+part,(req,res)=>file(res,'auth/'+part));
 }
 app.get('/auth/csrf',(req,res)=>{
@@ -153,15 +187,13 @@ app.get('/portal.html',session,(req,res)=>file(res,'portal.html'));
 for(const part of ['portal-app.js','portal-routes.js','portal-ui.css','operations-ui.css','operations-schema.js','operations-ui.js','quotes.js','finance.js','sage-readiness.js']){
   app.get('/'+part,session,(req,res)=>file(res,part));
 }
-// Versioned, session-protected capabilities. Business APIs remain disabled until
-// approved Firestore, per-record RBAC and audit logging are deployed in Phase 03.
-app.get('/api/v1/capabilities',session,(req,res)=>{
-  noCache(res);
-  res.json({version:1,modules:{}});
-});
+// Every business route is gated by the verified SAML staff session.
+app.use('/api/v1',session,createBusinessRouter({
+  db,enabled:businessEnabled,requireSameOrigin,requireCsrf
+}));
 app.use('/api',session,(req,res)=>{
   noCache(res);
-  res.status(501).json({error:'Business data API is not configured'});
+  res.status(404).json({error:'API endpoint not found'});
 });
 app.use((req,res)=>res.status(404).send('Not found'));
 const port=Number(process.env.PORT||8080);
