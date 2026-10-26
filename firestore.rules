@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // All DizzyOps records are served exclusively through the authenticated
+    // Cloud Run backend using its scoped service account. Client SDK denied.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
