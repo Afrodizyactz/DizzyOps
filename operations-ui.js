@@ -100,11 +100,11 @@ function renderRecords(name){
 }
 function renderEditor(name){
  const def=model.schemas[name],s=getState(name),existing=s.editing?.record||null;
- const readOnly=!!existing&&!canWrite(name);
+ const readOnly=!!existing&&(!canWrite(name)||s.editing?.readOnly===true);
  const fields=def.fields.map(f=>fieldInput(f,existing?.[f.key]??'')).join('');
  return '<section class="panel ops-editor"><div class="ops-section-head"><div><h2>'+
   (existing?(readOnly?'View':'Edit'):'Prepare')+' '+esc(def.label.toLowerCase())+' details</h2>'+
-  '<p>'+(canWrite(name)?'Changes require secure server validation and authorization.':
+  '<p>'+(!readOnly&&canWrite(name)?'Changes require secure server validation and authorization.':
   'Blank form preview. Validate field requirements locally; no data will be saved.')+'</p></div>'+
   '<button id="ops-back" type="button">Back to register</button></div>'+
   '<form id="ops-form" novalidate><div class="ops-fields">'+fields+
@@ -112,7 +112,7 @@ function renderEditor(name){
   def.statuses.map(x=>'<option value="'+esc(x)+'"'+(existing?.status===x?' selected':'')+'>'+esc(x)+'</option>').join('')+'</select></label></div>'+
   '<div id="ops-validation" role="status" aria-live="polite"></div>'+
   '<div class="ops-form-actions"><button type="button" id="ops-validate">Validate details</button>'+
-  (canWrite(name)?'<button type="submit" class="primary-action">'+(existing?'Save changes':'Create record')+'</button>':
+  (!readOnly&&canWrite(name)?'<button type="submit" class="primary-action">'+(existing?'Save changes':'Create record')+'</button>':
   '<button type="submit" disabled title="Secure database and role permission required">Save requires backend</button>')+
   '<button type="reset" id="ops-clear">Clear changes</button></div>'+
   '</form></section>';
@@ -138,7 +138,7 @@ function render(name,identity){
    (s.tab===tab?' class="active"':'')+'>'+label+'</button>').join('')+'</div>'+
   '<div id="ops-content">'+(s.tab==='form'?renderEditor(name):s.tab==='workflow'?renderWorkflow(name):renderRecords(name))+'</div></div>';
  bind(name);
- if(isStaff()&&!s.loaded&&!s.loading&&!capabilities)void checkCapabilities().then(()=>{
+ if(isStaff()&&!s.loaded&&!s.loading&&!capPromise)void checkCapabilities().then(()=>{
    if(active!==name)return;
    const t=getState(name);
    if(capability(name).read){void load(name)}else render(name,staff);
@@ -161,7 +161,7 @@ async function load(name){
     throw Error('Unexpected API result. Records were not displayed.');
   if(token!==s.requestId)return;
   s.records=payload.items;s.nextCursor=typeof payload.nextCursor==='string'?payload.nextCursor:null;s.loaded=true;
- }catch(error){if(token!==s.requestId)return;s.records=[];s.nextCursor=null;s.error=error.message||'Unable to load records.'}
+ }catch(error){if(token!==s.requestId)return;s.records=[];s.nextCursor=null;s.loaded=true;s.error=error.message||'Unable to load records.'}
  finally{if(token===s.requestId){s.loading=false;if(active===name)render(name,staff)}}
 }
 function readForm(name){
@@ -207,7 +207,7 @@ function bind(name){
   $('ops-validate')?.addEventListener('click',()=>validateForm(name));
   $('ops-form')?.addEventListener('submit',e=>{e.preventDefault();void submitForm(name)});
   $('ops-form')?.addEventListener('reset',()=>{const box=$('ops-validation');if(box)box.textContent='Unsaved form fields cleared.'});
-  if(s.editing&&!canWrite(name))$('ops-form')?.querySelectorAll('input,select,textarea').forEach(el=>{el.disabled=true});
+  if(s.editing?.readOnly===true||s.editing&&!canWrite(name))$('ops-form')?.querySelectorAll('input,select,textarea').forEach(el=>{el.disabled=true});
   return;
  }
  if(s.tab==='workflow'){
