@@ -137,7 +137,7 @@ function render(name,identity){
   [['records','Register'],['form','Form'],['workflow','Workflow']].map(([tab,label])=>
    '<button type="button" role="tab" id="ops-tab-'+tab+'" aria-controls="ops-content" data-ops-tab="'+tab+'" tabindex="'+(s.tab===tab?'0':'-1')+'" aria-selected="'+(s.tab===tab)+'"'+
    (s.tab===tab?' class="active"':'')+'>'+label+'</button>').join('')+'</div>'+
-  '<div id="ops-content" role="tabpanel" tabindex="0" aria-labelledby="ops-tab-'+s.tab+'">'+(s.tab='form'?renderEditor(name):s.tab==='workflow'?renderWorkflow(name):renderRecords(name))+'</div></div>';
+  '<div id="ops-content" role="tabpanel" tabindex="0" aria-labelledby="ops-tab-'+s.tab+'">'+(s.tab==='form'?renderEditor(name):s.tab==='workflow'?renderWorkflow(name):renderRecords(name))+'</div></div>';
  bind(name);
  if(isStaff()&&!s.loaded&&!s.loading&&!capPromise)void checkCapabilities().then(()=>{
    if(active!==name)return;
