@@ -87,8 +87,8 @@ function renderRecords(name){
  return '<div class="ops-toolbar"><label>Search register<input id="ops-query" type="search" value="'+esc(s.query)+'" placeholder="Search authorized records"></label>'+
  '<label>Workflow status<select id="ops-status"><option value="">All statuses</option>'+
   def.statuses.map(t=>'<option value="'+esc(t)+'"'+(s.status===t?' selected':'')+'>'+esc(t)+'</option>').join('')+'</select></label>'+
- '<label>Sort by<select id="ops-sort"><option value="">Default order</option>'+
-  columns.map(c=>'<option value="'+esc(c)+'"'+(s.sort===c?' selected':'')+'>'+esc(def.fields.find(f=>f.key===c)?.label||c)+'</option>').join('')+'</select></label>'+
+ '<label>Sort by<select id="ops-sort"><option value=""'+(!s.sort?' selected':'')+'>Newest first</option>'+
+  '<option value="searchLabel"'+(s.sort==='searchLabel'?' selected':'')+'>Name A–Z</option></select></label>'+
  '<div class="ops-toolbar-actions"><button type="button" id="ops-apply">Apply filters</button><button type="button" id="ops-reset">Reset</button></div></div>'+
  '<section class="panel ops-records"><div class="ops-section-head"><div><h2>'+esc(def.label)+' register</h2><p>'+
  (s.loading?'Loading authorized records…':s.error?esc(s.error):s.loaded?'Showing authorized records':'No synchronized records')+
