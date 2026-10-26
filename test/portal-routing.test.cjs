@@ -30,7 +30,7 @@ assert.match(html,/portal-ui\.css/);
 });
 test('UI routing calls modules only through staff verification',()=>{
 const app=src('portal-app.js');
-for(const check of ['DizzyQuotes.render()','DizzyFinance.render(name)','DizzySage.attach(name)',
+for(const check of ['DizzyQuotes.render()','DizzyFinance.render(name)','DizzySage?.attach(name)',
 'DizzySage.render()','DizzyRoutes.canRenderFinance(verifiedStaff','/auth/me','popstate','sidebar-backdrop','history.pushState'])
 assert.ok(app.includes(check),'routing missing '+check);
 });
