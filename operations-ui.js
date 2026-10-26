@@ -30,7 +30,7 @@ async function checkCapabilities(){
  capPromise=jsonGet('/api/v1/capabilities').then(result=>{
    if(result?.version!==1||!result?.modules||Array.isArray(result.modules))throw Error('Invalid API capability response');
    capabilities=result;return result;
- }).catch(()=>{capabilities=null;return null});
+ }).catch(()=>{capabilities={version:1,modules:{}};return capabilities});
  return capPromise;
 }
 async function mutate(name,method,id,body){
