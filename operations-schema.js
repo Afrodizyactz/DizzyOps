@@ -4,12 +4,12 @@
 (function(root){
 'use strict';
 const field=(key,label,type='text',required=false,options=[],help='')=>Object.freeze({key,label,type,required,options,help});
-const module=(slug,label,description,fields,statuses,steps,columns)=>Object.freeze({
+const createModule=(slug,label,description,fields,statuses,steps,columns)=>Object.freeze({
   slug,label,description,fields,statuses,steps,columns,
   apiPath:'/api/v1/modules/'+slug
 });
 const schemas={
-Bookings:module('bookings','Bookings','Track enquiries, client event requirements, calendar reservations and approval status.',[
+Bookings:createModule('bookings','Bookings','Track enquiries, client event requirements, calendar reservations and approval status.',[
 field('clientId','Client reference','text',true),field('eventName','Event / production name','text',true),
 field('eventDate','Event date','date',true),field('startTime','Start time','time',true),
 field('endTime','End time','time'),field('venue','Venue / location','text',true),
@@ -21,7 +21,7 @@ field('coordinatorId','Assigned coordinator'),field('notes','Internal booking no
 ],['Enquiry','Review','Quoted','Pending confirmation','Confirmed','Cancelled','Completed'],
 ['Capture the enquiry and verify customer contact','Check performers, venue, assets and date conflicts','Prepare and approve a Sage quotation','Confirm the booking and create a job record'],
 ['eventName','clientId','eventDate','venue','status']),
-Jobs:module('jobs','Jobs & Assignments','Coordinate confirmed bookings, performers, production crew, transport and completion evidence.',[
+Jobs:createModule('jobs','Jobs & Assignments','Coordinate confirmed bookings, performers, production crew, transport and completion evidence.',[
 field('bookingId','Confirmed booking reference','text',true),field('jobTitle','Job title','text',true),
 field('eventDate','Event date','date',true),field('callTime','Call time','time'),
 field('startTime','Event start','time'),field('endTime','Event end','time'),
@@ -34,7 +34,7 @@ field('completionNotes','Completion notes','textarea')
 ],['Scheduled','Briefing','Confirmed','In progress','Completed','Signed off','Cancelled'],
 ['Validate booking and confirm event schedule','Offer assignments using scoped guest links','Approve production requirements and logistics','Record completion and obtain client sign-off','Trigger post-job follow-ups and finance review'],
 ['jobTitle','bookingId','eventDate','jobManager','status']),
-Performers:module('performers','Performers','Maintain approved performer profiles, contact preferences, specialties and compliance readiness.',[
+Performers:createModule('performers','Performers','Maintain approved performer profiles, contact preferences, specialties and compliance readiness.',[
 field('displayName','Performer / stage name','text',true),
 field('legalName','Legal / contracting name','text'),
 field('email','Contact email','email',true),field('phone','Phone','tel'),
@@ -48,7 +48,7 @@ field('notes','Internal notes','textarea')
 ],['Pending review','Active','Unavailable','Inactive'],
 ['Collect minimal personal details with appropriate consent','Check performer category and documentation','Approve approved engagement rates and contract','Request availability via time-limited action link'],
 ['displayName','category','homeCity','contractStatus','status']),
-Clients:module('clients','Clients & CRM','Manage customer relationships, decision-makers, requests and communications.',[
+Clients:createModule('clients','Clients & CRM','Manage customer relationships, decision-makers, requests and communications.',[
 field('name','Customer / company','text',true),field('contactName','Primary contact','text',true),
 field('email','Email','email',true),field('phone','Phone','tel'),
 field('clientType','Customer type','select',true,['Company','Individual','Agency','Venue','Other']),
@@ -59,7 +59,7 @@ field('notes','Relationship notes','textarea')
 ],['Prospect','Active','Dormant','Archived'],
 ['Capture legitimate enquiry and authorized contact','Check duplicates and contact permissions','Link confirmed bookings and Sage records','Track outreach and follow-up'],
 ['name','contactName','email','accountOwner','status']),
-Partners:module('partners','Agents & Suppliers','Coordinate partner companies, couriers, freelance agents and specialist suppliers.',[
+Partners:createModule('partners','Agents & Suppliers','Coordinate partner companies, couriers, freelance agents and specialist suppliers.',[
 field('name','Supplier / agent name','text',true),field('type','Partner type','select',true,['Agent','Supplier','Courier','Production crew','Fabricator','Venue','Other']),
 field('contactName','Contact person'),field('email','Email','email',true),field('phone','Phone','tel'),
 field('serviceArea','Service area / region'),field('services','Services supplied','textarea'),
@@ -68,7 +68,7 @@ field('taxRef','Tax / supplier reference'),field('notes','Supplier notes','texta
 ],['Prospective','Approved','On hold','Inactive'],
 ['Verify legal supplier identity and contact','Approve service categories, terms and agreement','Link supplier to jobs or purchase requests','Review performance and payment status'],
 ['name','type','serviceArea','agreementRef','status']),
-Inventory:module('inventory','Costumes & Inventory','Track costume pieces, consumables, checkout, stock counts and return condition.',[
+Inventory:createModule('inventory','Costumes & Inventory','Track costume pieces, consumables, checkout, stock counts and return condition.',[
 field('itemName','Item / costume name','text',true),field('sku','Stock / costume reference','text',true),
 field('category','Category','select',true,['Costume','Prop','Accessory','Consumable','Equipment','Other']),
 field('quantity','Total quantity','integer',true),field('availableQuantity','Available quantity','integer'),
@@ -79,7 +79,7 @@ field('size','Size / specification'),field('notes','Handling and return notes','
 ],['Available','Reserved','Checked out','Maintenance','Retired'],
 ['Register inventory with verified count and location','Reserve by job and confirm availability','Issue through authorised checkout','Inspect returned items and update condition'],
 ['itemName','sku','quantity','storageLocation','status']),
-Assets:module('assets','Assets & Couriers','Track equipment, transport movements, dispatch and proof-of-delivery.',[
+Assets:createModule('assets','Assets & Couriers','Track equipment, transport movements, dispatch and proof-of-delivery.',[
 field('assetName','Asset / delivery name','text',true),field('assetTag','Asset reference','text',true),
 field('relatedJob','Job reference'),field('courier','Assigned courier / supplier'),
 field('pickupDate','Pickup date','date'),field('deliveryDate','Due delivery date','date'),
@@ -90,7 +90,7 @@ field('notes','Packaging / handling notes','textarea')
 ],['Available','Reserved','In transit','Delivered','Return pending','Returned','Issue'],
 ['Reserve asset for confirmed job','Confirm dispatch instructions and courier','Record delivery handover and evidence','Schedule and verify return'],
 ['assetName','assetTag','deliveryDate','destination','status']),
-Fabrication:module('fabrication','Fabrication','Manage bespoke props, build briefs, supplier estimates, milestones and delivery.',[
+Fabrication:createModule('fabrication','Fabrication','Manage bespoke props, build briefs, supplier estimates, milestones and delivery.',[
 field('projectName','Fabrication project','text',true),field('jobReference','Related job reference'),
 field('supplierId','Fabricator / supplier reference','text',true),
 field('requiredBy','Required delivery date','date',true),field('description','Specification / fabrication brief','textarea',true),
@@ -100,7 +100,7 @@ field('deliveryLocation','Delivery location'),field('qualityNotes','Quality / sa
 ],['Brief','Quoted','Awaiting approval','In production','Quality review','Delivered','Cancelled'],
 ['Write and approve specification','Collect vendor quote and budget approval','Track milestones and revision requests','Verify final quality and delivery'],
 ['projectName','supplierId','requiredBy','milestone','status']),
-Documents:module('documents','Documents','Manage metadata and permissions for documents and media stored in Google Shared Drive.',[
+Documents:createModule('documents','Documents','Manage metadata and permissions for documents and media stored in Google Shared Drive.',[
 field('title','Document title','text',true),field('category','Document category','select',true,['Contract','Booking brief','Performer agreement','Finance','Photo','Video','Other']),
 field('jobReference','Related job reference'),field('clientReference','Related client reference'),
 field('driveFileId','Google Drive file reference','text',true),
@@ -111,7 +111,7 @@ field('notes','Description / rights notes','textarea')
 ],['Awaiting review','Approved','Restricted','Archived'],
 ['Upload to an approved Shared Drive through the backend','Apply classification and ownership','Verify permissions and usage rights','Link the Drive file to an authorized job'],
 ['title','category','jobReference','classification','status']),
-FollowUp:module('follow-ups','Post-job follow-up','Coordinate client satisfaction, media retrieval, rights approvals and handover after each event.',[
+FollowUp:createModule('follow-ups','Post-job follow-up','Coordinate client satisfaction, media retrieval, rights approvals and handover after each event.',[
 field('jobReference','Completed job reference','text',true),
 field('clientReference','Client reference','text',true),
 field('owner','Follow-up owner','text',true),
