@@ -150,10 +150,19 @@ app.post('/auth/logout',requireSameOrigin,requireCsrf,session,async(req,res)=>{
 });
 app.get('/portal.html',session,(req,res)=>file(res,'portal.html'));
 // Resource code is never an authorization boundary, but serve it only after auth on Cloud Run.
-for(const part of ['portal-app.js','portal-routes.js','portal-ui.css','quotes.js','finance.js','sage-readiness.js']){
+for(const part of ['portal-app.js','portal-routes.js','portal-ui.css','operations-ui.css','operations-schema.js','operations-ui.js','quotes.js','finance.js','sage-readiness.js']){
   app.get('/'+part,session,(req,res)=>file(res,part));
 }
-app.use('/api',(req,res)=>res.status(404).json({error:'API not implemented'}));
+// Versioned, session-protected capabilities. Business APIs remain disabled until
+// approved Firestore, per-record RBAC and audit logging are deployed in Phase 03.
+app.get('/api/v1/capabilities',session,(req,res)=>{
+  noCache(res);
+  res.json({version:1,modules:{}});
+});
+app.use('/api',session,(req,res)=>{
+  noCache(res);
+  res.status(501).json({error:'Business data API is not configured'});
+});
 app.use((req,res)=>res.status(404).send('Not found'));
 const port=Number(process.env.PORT||8080);
 app.listen(port,'0.0.0.0',()=>console.log('DizzyOps auth server listening on '+port));

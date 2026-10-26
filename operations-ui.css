@@ -1,0 +1,87 @@
+/* Phase 02 — responsive, accessible business workspace design. Uses AfrodizzyActs charcoal/red tokens. */
+.ops-shell{display:grid;gap:20px;min-width:0}
+.ops-shell .panel{min-width:0}
+.ops-notice{border:1px solid #67484b;border-left:4px solid #ed666e;background:#261d20;
+border-radius:11px;padding:16px 19px;color:#ede6e7;line-height:1.65}
+.ops-notice strong{color:#ffaaa9;display:block;margin-bottom:5px}
+.ops-notice p{margin:0;color:#d1c8ca;font-size:13px}
+.ops-tabs{display:flex;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid #37373c;padding-bottom:12px}
+.ops-tabs button{background:#242426;color:#dedee2;border:1px solid #444;padding:11px 18px;min-height:44px;border-radius:10px}
+.ops-tabs button.active,.ops-tabs button[aria-selected="true"]{background:#b63039;color:white;border-color:#dd545c}
+.ops-toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.ops-toolbar label,.ops-field{display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:700}
+.ops-toolbar label{flex:1 1 185px;max-width:340px}
+.ops-toolbar input,.ops-toolbar select,.ops-field :is(input,select,textarea){
+width:100%;min-width:0;max-width:100%;background:#111214;border:1px solid #62626a;color:#fff;
+border-radius:9px;min-height:45px;padding:10px 12px;font:inherit}
+.ops-toolbar :is(input,select):focus-visible,.ops-field :is(input,select,textarea):focus-visible,
+.ops-shell button:focus-visible{outline:3px solid #ff9aa0;outline-offset:2px}
+.ops-toolbar-actions,.ops-form-actions{display:flex;align-items:center;flex-wrap:wrap;gap:11px}
+.ops-toolbar-actions button,.ops-form-actions button,.ops-section-head button,.ops-pagination button,
+.ops-step-list+button,.ops-quicklinks button,.ops-table button{
+background:#28282b;border:1px solid #68686e;color:#fff;padding:10px 14px;border-radius:9px;min-height:44px;max-width:100%}
+.ops-section-head{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:18px;margin-bottom:20px}
+.ops-section-head h2{margin:0 0 6px}
+.ops-section-head p{margin:0;font-size:13px}
+.ops-records{display:block}
+.ops-empty{padding:40px 18px;border:1px dashed #505059;border-radius:14px;text-align:center;background:#171719}
+.ops-empty strong{display:block;color:#f7f5f6;font-size:17px}
+.ops-empty p{max-width:510px;margin:10px auto 0}
+.ops-table-wrap{width:100%;overflow:auto;overscroll-behavior:contain}
+.ops-table{width:100%;border-collapse:collapse;min-width:770px}
+.ops-table th,.ops-table td{font-size:13px;padding:14px 10px;text-align:left;border-bottom:1px solid #43434a;vertical-align:top;overflow-wrap:anywhere}
+.ops-table th{color:#cccbd1;font-weight:800;white-space:nowrap}
+.ops-table td{color:#f3f2f4}
+.ops-pagination{display:flex;justify-content:flex-end;align-items:center;gap:14px;margin-top:20px}
+.ops-pagination button:disabled,.ops-shell button:disabled{cursor:not-allowed;opacity:.45}
+.ops-muted{color:#c4c1c6;line-height:1.7;font-size:13px}
+.ops-editor form{display:grid;gap:22px}
+.ops-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.ops-field{min-width:0}
+.ops-field:has(textarea){grid-column:1/-1}
+.ops-field small{color:#b8b4bb;font-weight:400;font-size:12px}
+.ops-error,.ops-success{font-size:13px;line-height:1.6;padding:12px 16px;border-radius:8px}
+.ops-error{border:1px solid #ab5157;color:#ffc5c9;background:#361e22}
+.ops-success{border:1px solid #567b66;color:#dbfbe6;background:#1a2a20}
+.ops-step-list{margin:15px 0 20px;padding-left:24px;display:grid;gap:12px}
+.ops-step-list li{line-height:1.6;color:#e8e4e8}
+.ops-step-list li::marker{color:#fa8089;font-weight:800}
+.ops-step-list label{display:flex;align-items:flex-start;gap:13px;cursor:pointer}
+.ops-step-list input{height:20px;width:20px;margin-top:2px;accent-color:#bf3540;flex-shrink:0}
+.ops-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.ops-kpi{border:1px solid #3c3b42;background:#1d1c20;padding:23px 19px;border-radius:15px;display:grid;gap:10px}
+.ops-kpi>span{font-size:13px;color:#c6c3ca}
+.ops-kpi strong{font-size:32px;line-height:1.2;font-variant-numeric:tabular-nums}
+.ops-kpi small{font-size:11px;color:#aaa8b0}
+.ops-quicklinks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.ops-quicklinks button{text-align:left;min-height:64px;font-weight:700}
+.ops-queues{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.ops-queue{border:1px solid #424047;border-radius:12px;padding:18px;display:grid;gap:8px}
+.ops-queue strong{color:#eee}
+.ops-queue span{font-size:12px;color:#bbb}
+.ops-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.ops-settings-grid .panel h2{font-size:17px}
+.ops-settings-grid .panel p{font-size:13px}
+.ops-settings-grid .pill{display:inline-block}
+@media(max-width:1080px){.ops-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:850px){.ops-fields{grid-template-columns:1fr}.ops-quicklinks{grid-template-columns:repeat(2,minmax(0,1fr))}.ops-settings-grid,.ops-queues{grid-template-columns:1fr}}
+@media(max-width:650px){
+.ops-shell{gap:16px}
+.ops-notice{padding:14px}
+.ops-toolbar label,.ops-toolbar-actions,.ops-toolbar-actions button,.ops-section-head>button{flex:1 1 100%;max-width:none}
+.ops-toolbar-actions button{width:100%}
+.ops-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.ops-tabs button{font-size:12px;padding:10px 5px}
+.ops-kpi{padding:16px}
+.ops-kpi strong{font-size:26px}
+.ops-quicklinks{grid-template-columns:1fr}
+.ops-form-actions button{flex:1 1 100%}
+.ops-pagination{justify-content:space-between}
+.ops-table{min-width:0}
+.ops-table thead{display:none}
+.ops-table tbody{display:grid;gap:12px}
+.ops-table tr{display:block;border:1px solid #42424a;border-radius:12px;padding:10px;background:#202023}
+.ops-table td{display:flex;justify-content:space-between;gap:15px;text-align:right;padding:10px 4px}
+.ops-table td:before{content:attr(data-label);flex:0 0 40%;text-align:left;color:#bfbcc4;font-weight:700}
+}
+@media(max-width:370px){.ops-kpis{grid-template-columns:1fr}}

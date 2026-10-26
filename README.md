@@ -23,3 +23,7 @@ The development preview does not connect production records, database persistenc
 ## Phase 01 navigation and financial module previews
 
 DizzyOps now includes a shared route registry, improved responsive mobile navigation and linked Quotes, Finance and Sage UI modules. Financial draft forms remain available only to verified staff on a protected host; **there is no live database or Sage sync**. The public GitHub Pages portal is a design preview and cannot protect real data. See [Phase 01 acceptance checks](docs/phase-01-navigation.md).
+
+## Phase 02 — operational workspaces
+
+Operational modules now have structured forms and validation rules, workflow checklists, search/status/sort controls, responsive empty registers, read-only verified metrics, and secure API wiring prepared for a future backend. No seeded customers, performers, bookings or other business records are included. **No records are saved while the backend is absent**; modules show explicit status messaging. The existing staff session boundary and role checks remain unchanged. See [Phase 02 implementation details](docs/phase-02-business-modules.md).
