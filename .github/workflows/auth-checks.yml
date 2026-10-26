@@ -7,6 +7,12 @@ on:
       - 'server/**'
       - 'portal.html'
       - 'portal-app.js'
+      - 'portal-routes.js'
+      - 'portal-ui.css'
+      - 'quotes.js'
+      - 'finance.js'
+      - 'sage-readiness.js'
+      - 'test/**'
       - '.github/workflows/auth-checks.yml'
   pull_request:
     paths:
@@ -14,6 +20,12 @@ on:
       - 'server/**'
       - 'portal.html'
       - 'portal-app.js'
+      - 'portal-routes.js'
+      - 'portal-ui.css'
+      - 'quotes.js'
+      - 'finance.js'
+      - 'sage-readiness.js'
+      - 'test/**'
       - '.github/workflows/auth-checks.yml'
 permissions:
   contents: read
@@ -31,5 +43,12 @@ jobs:
           node --check auth/login.js
           node --check auth/identity-platform.js
           node --check portal-app.js
+          node --check portal-routes.js
+          node --check quotes.js
+          node --check finance.js
+          node --check sage-readiness.js
       - name: Verify certificate and fail-closed auth settings
         run: npm test --prefix server
+
+      - name: Test portal routing and protected module wiring
+        run: node --test test/portal-routing.test.cjs

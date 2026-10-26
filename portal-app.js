@@ -1,7 +1,8 @@
 
-const sections=[['Overview','Dashboard'],['Bookings','Bookings'],['Jobs & Assignments','Jobs'],['Performers','Performers'],['Clients & CRM','Clients'],['Agents & Suppliers','Partners'],['Quotes','Quotes'],['Invoices & Receipts','Invoices'],['Expenses & Commissions','Expenses'],['Payslips & Statements','Payroll'],['Costumes & Inventory','Inventory'],['Assets & Couriers','Assets'],['Fabrication','Fabrication'],['Documents','Documents'],['Post-job follow-up','FollowUp'],['Reports & Analytics','Reports'],['Settings','Settings'],['My profile','Profile'],['Account settings','AccountSettings'],['Log in','Login'],['Help & support','Support'],['Sign out','Signout']];
+const sections=window.DizzyRoutes.sections;
 const nav=document.getElementById('nav'),view=document.getElementById('view'),title=document.getElementById('title'),subtitle=document.getElementById('subtitle'),sidebar=document.getElementById('sidebar');
 function empty(name){return '<div class="empty"><strong>No '+name.toLowerCase()+' yet</strong><p>This workspace is ready for real records once secure authentication, data storage and integrations are configured. No sample records are displayed.</p></div>'}
+let verifiedStaff=null;
 const accountPages={Profile:1,AccountSettings:1,Login:1,Support:1,Signout:1};
 function accountView(name){const heading={Profile:'My profile',AccountSettings:'Account settings',Login:'Log in',Support:'Help & support',Signout:'Sign out'}[name];title.textContent=heading;subtitle.textContent='Account and assistance · AfrodizzyActs DizzyOps';let body='';if(name==='Profile')body='<div class="notice">No user is signed in. Profile details will be available after identity integration.</div><div class="account-grid"><section class="panel"><h2>Personal information</h2><p>Name, email, phone number and avatar will appear here for the authenticated user.</p></section><section class="panel"><h2>Organization & access</h2><p>Assigned role, permissions and organization membership will be shown here.</p></section></div>';if(name==='AccountSettings')body='<div class="notice">Display preferences are stored only in this browser. Account security and notification preferences require a connected identity service.</div><section class="panel"><h2>Display preferences</h2><label class="field">Interface density<select id="density"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label><button class="primary-action" id="save-preferences">Save preferences</button><p id="preferences-status" role="status"></p></section><div class="account-grid"><section class="panel"><h2>Security</h2><p>Password, multifactor authentication and active sessions will be managed through the identity provider.</p></section><section class="panel"><h2>Notifications</h2><p>Notification delivery will become available when user accounts are enabled.</p></section></div>';if(name==='Login'){const auth=window.DIZZYOPS_AUTH_CONFIG||{};let ready=false;try{const url=new URL(auth.loginUrl);ready=auth.enabled===true&&url.protocol==='https:'&&url.username===''&&url.password===''&&url.hash===''&&url.search===''&&url.hostname!=='accounts.google.com'}catch{}body='<div class="notice">'+(ready?'Google Workspace sign-in will be managed by the secure DizzyOps service provider.':'SSO configuration is prepared, but the secure service-provider endpoint has not been deployed. GitHub Pages remains an unauthenticated preview.')+'</div><section class="panel"><h2>Sign in with Google Workspace</h2><p>Use your AfrodizzyActs-approved Google Workspace account. Access is granted only after server-side SAML validation and role authorization.</p><button class="primary-action" id="google-sso-signin" '+(ready?'':'disabled title="Awaiting the secure service-provider endpoint"')+'>Continue with Google Workspace</button><p>Single sign-on uses Google as the identity provider. Do not enter a password into this portal.</p></section>'}if(name==='Support')body='<div class="account-grid"><section class="panel"><h2>Getting started</h2><p>Use the left navigation to explore bookings, performers, invoices, inventory and reporting. Records are empty until the database is connected.</p></section><section class="panel"><h2>Contact support</h2><p>Contact your AfrodizzyActs administrator for access, account or application assistance. A dedicated support channel has not yet been configured.</p></section><section class="panel"><h2>Technical details</h2><p>Application: DizzyOps · Deployment: GitHub Pages frontend · Authentication: pending · Data services: pending.</p></section></div>';if(name==='Signout')body='<div class="notice">No authenticated session exists in this preview, so there is nothing to sign out from.</div><section class="panel"><h2>Session management</h2><p>When secure sign-in is enabled, this page will end the server-side session and redirect to the login page.</p><button class="primary-action" id="return-login">Go to login</button></section>';view.innerHTML=body;if(name==='AccountSettings'){const select=document.getElementById('density');select.value=localStorage.getItem('dizzyops-density')||'comfortable';document.getElementById('save-preferences').onclick=()=>{localStorage.setItem('dizzyops-density',select.value);document.getElementById('preferences-status').textContent='Display preference saved in this browser.'}}if(name==='Signout')document.getElementById('return-login').onclick=()=>show('Login');if(name==='Login'){const b=document.getElementById('google-sso-signin');if(!b.disabled)b.onclick=()=>location.assign(window.DIZZYOPS_AUTH_CONFIG.loginUrl)}}
 function followUpView(){return `<div class="notice">Google Workspace and Drive are not connected. This screen contains no client or job data. Connect a secure backend before enabling live workflows.</div><div class="metrics"><div class="metric"><label>Jobs awaiting follow-up</label><strong>—</strong></div><div class="metric"><label>Feedback outstanding</label><strong>—</strong></div><div class="metric"><label>Media requests pending</label><strong>—</strong></div><div class="metric"><label>Media collected</label><strong>—</strong></div></div><div class="grid"><section class="panel"><h2>Post-job workflow</h2><p>Each completed job will generate an assigned follow-up record with an audit trail.</p><ol class="workflow-steps"><li>Thank the client using Gmail</li><li>Request and record client feedback</li><li>Request client photographs and videos</li><li>Follow up for professional photography and video</li><li>Search social channels and record source links</li><li>Request media from event or job managers</li><li>Verify usage rights and archive approved media in Drive</li></ol></section><section class="panel"><h2>Google Workspace integration</h2><p>Integration status: Not configured</p><p>Use Google OAuth 2.0 / OpenID Connect for staff sign-in, a server-side API for Gmail and Drive operations, and least-privilege permissions. Never put API secrets in GitHub Pages.</p><a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer">Google Cloud credentials ↗</a><p><a href="https://developers.google.com/workspace/drive/api/guides/about-sdk" target="_blank" rel="noopener noreferrer">Google Drive API documentation ↗</a></p><p><a href="https://developers.google.com/workspace/gmail/api/guides" target="_blank" rel="noopener noreferrer">Gmail API documentation ↗</a></p></section></div><section class="panel" style="margin-top:18px"><h2>Integration readiness</h2><p>To activate real jobs and follow-ups, an AfrodizzyActs Google Workspace administrator must approve the identity and API configuration. These controls are deliberately unavailable until a secure backend is deployed.</p><ol class="workflow-steps"><li>Confirm Google Cloud project and approved Workspace domain</li><li>Configure OIDC sign-in and server-side sessions</li><li>Provision private data storage and role-based access</li><li>Grant least-privilege Gmail and Drive API access with administrator consent</li><li>Set up a dedicated Shared Drive and job folder policy</li><li>Verify audit logging, retention and POPIA requirements</li></ol><p><a href="https://github.com/AfrodizzyActs/DizzyOps/blob/main/docs/post-job-google-workspace-integration.md" target="_blank" rel="noopener noreferrer">Read integration specification ↗</a></p></section><section class="panel" style="margin-top:18px"><h2>Follow-up register</h2><div class="empty"><strong>No follow-up records</strong><p>Once the secure backend is connected, this register will show job, client, assigned owner, thank-you status, feedback, media status, next action, deadline and linked Drive folder.</p></div></section>`}
@@ -31,8 +32,129 @@ function moduleView(name,label){
 }
 function wireModule(name){const form=document.getElementById('module-form');if(!form)return;const status=document.getElementById('module-feedback');form.addEventListener('reset',()=>{status.textContent='Form cleared. No records were saved.'});document.getElementById('module-review').onclick=()=>{const values=[...new FormData(form).values()].map(x=>String(x).trim());if(values.every(x=>!x)){status.textContent='Enter details before reviewing.';return}const invalid=[...form.querySelectorAll('input')].find(x=>!x.checkValidity());if(invalid){invalid.reportValidity();return}status.textContent='Details reviewed locally. Nothing was saved or submitted; secure data services are not yet connected.'};}
 
-function dashboardView(){return '<div class="dashboard-actions"><button class="quick-search" data-action="search">Search workspace (Ctrl/⌘ K)</button><button class="primary-action" disabled title="Backend not connected">+ New booking</button></div><div class="metrics">'+['Active bookings','Registered performers','Open invoices','Pending assignments'].map(a=>'<div class="metric"><label>'+a+'</label><strong>—</strong><p>Not connected</p></div>').join('')+'</div><h2>Needs attention</h2><div class="task-cards">'+[['Upcoming bookings','Bookings'],['Job assignments','Jobs'],['Client follow-ups','FollowUp'],['Financial documents','Quotes']].map(([label,key])=>'<article class="task-card"><h2>'+label+'</h2><p>No live records connected.</p><button data-go="' + key + '">Open workspace</button></article>').join('')+'</div><div class="notice">No sample data is shown. Connect authentication and the database to enable live operations.</div>'}function openSearch(){document.getElementById('search-overlay').hidden=false;const input=document.getElementById('search-input');input.value='';renderSearch('');input.focus()}function closeSearch(){document.getElementById('search-overlay').hidden=true;document.querySelector('.quick-search')?.focus()}function renderSearch(q){const box=document.getElementById('search-results');box.replaceChildren();const matches=sections.filter(([label,key])=>!accountPages[key]&&(label+' '+key).toLowerCase().includes(q.toLowerCase())).slice(0,15);if(!matches.length){box.textContent='No matching modules';return}matches.forEach(([label,key])=>{const b=document.createElement('button');b.className='search-result';b.textContent=label;b.onclick=()=>{closeSearch();show(key)};box.appendChild(b)})}function show(name){if(accountPages[name]){accountView(name);document.querySelectorAll('[data-page]').forEach(b=>{b.classList.toggle('active',b.dataset.page===name);b.setAttribute('aria-current',b.dataset.page===name?'page':'false')});sidebar.classList.remove('open');document.getElementById('menu').setAttribute('aria-expanded','false');closeAccountMenu();history.replaceState(null,'','#'+name.toLowerCase());return}const valid=sections.find(s=>s[1]===name)||sections[0];name=valid[1];title.textContent=valid[0];subtitle.textContent=name==='Dashboard'?'Your centralized workspace for bookings, performers, finance and operations.':'Manage '+valid[0].toLowerCase()+' in the DizzyOps workspace.';document.querySelectorAll('[data-page]').forEach(b=>{b.classList.toggle('active',b.dataset.page===name);b.setAttribute('aria-current',b.dataset.page===name?'page':'false')});if(name==='FollowUp'){view.innerHTML=followUpView()}else if(name==='Dashboard'){view.innerHTML=dashboardView()}else{view.innerHTML=moduleView(name,valid[0]);wireModule(name)}sidebar.classList.remove('open');document.getElementById('menu').setAttribute('aria-expanded','false');history.replaceState(null,'','#'+name.toLowerCase().replaceAll(' ','-'))}
-const groups=[['WORKSPACE',['Dashboard','Bookings','Jobs','FollowUp']],['PEOPLE',['Performers','Clients','Partners']],['FINANCE',['Quotes','Invoices','Expenses','Payroll']],['RESOURCES',['Inventory','Assets','Fabrication','Documents']],['INSIGHTS',['Reports']],['ADMIN',['Settings']]];groups.forEach(([heading,keys])=>{const h=document.createElement('div');h.className='nav-heading';h.textContent=heading;nav.appendChild(h);keys.forEach(key=>{const label=sections.find(s=>s[1]===key)?.[0];if(!label)return;const b=document.createElement('button');b.textContent=label;b.dataset.page=key;b.onclick=()=>show(key);nav.appendChild(b)})});[['Home','Dashboard'],['Jobs','Jobs'],['Follow-ups','FollowUp'],['More','More']].forEach(([label,key])=>{const b=document.createElement('button');b.textContent=label;b.dataset.page=key;b.onclick=()=>key==='More'?(sidebar.classList.add('open'),document.getElementById('menu').setAttribute('aria-expanded','true')):show(key);document.getElementById('bottom-nav').appendChild(b)});document.getElementById('menu').addEventListener('click',()=>{const open=sidebar.classList.toggle('open');document.getElementById('menu').setAttribute('aria-expanded',String(open))});const accountTrigger=document.getElementById('account-trigger'),accountMenu=document.getElementById('account-menu');function closeAccountMenu(){accountMenu.hidden=true;accountTrigger.setAttribute('aria-expanded','false')}function toggleAccountMenu(){accountMenu.hidden=!accountMenu.hidden;accountTrigger.setAttribute('aria-expanded',String(!accountMenu.hidden));if(!accountMenu.hidden)accountMenu.querySelector('[role="menuitem"]').focus()}accountTrigger.addEventListener('click',toggleAccountMenu);accountMenu.querySelectorAll('[data-account]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.account)));document.addEventListener('click',e=>{if(!e.target.closest('.account-wrap'))closeAccountMenu()});document.getElementById('search-close').onclick=closeSearch;document.getElementById('search-input').oninput=e=>renderSearch(e.target.value);document.getElementById('search-overlay').onclick=e=>{if(e.target.id==='search-overlay')closeSearch()};document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openSearch()}if(e.key==='Escape'){if(!document.getElementById('search-overlay').hidden)closeSearch();else closeAccountMenu()}});window.addEventListener('hashchange',()=>{const key=location.hash.slice(1).toLowerCase();const found=sections.find(s=>s[1].toLowerCase()===key);if(found)show(found[1])});show(sections.find(s=>s[1].toLowerCase()===location.hash.slice(1))?.[1]||'Dashboard');
+function dashboardView(){return '<div class="dashboard-actions"><button class="quick-search" data-action="search">Search workspace (Ctrl/⌘ K)</button><button class="primary-action" disabled title="Backend not connected">+ New booking</button></div><div class="metrics">'+['Active bookings','Registered performers','Open invoices','Pending assignments'].map(a=>'<div class="metric"><label>'+a+'</label><strong>—</strong><p>Not connected</p></div>').join('')+'</div><h2>Needs attention</h2><div class="task-cards">'+[['Upcoming bookings','Bookings'],['Job assignments','Jobs'],['Client follow-ups','FollowUp'],['Financial documents','Quotes']].map(([label,key])=>'<article class="task-card"><h2>'+label+'</h2><p>No live records connected.</p><button data-go="' + key + '">Open workspace</button></article>').join('')+'</div><div class="notice">No sample data is shown. Connect authentication and the database to enable live operations.</div>'}let searchReturnFocus=null;
+function openSearch(){
+  const overlay=document.getElementById('search-overlay');
+  if(!overlay.hidden)return;
+  searchReturnFocus=document.activeElement;overlay.hidden=false;
+  document.body.classList.add('search-open');
+  const input=document.getElementById('search-input');input.value='';renderSearch('');input.focus();
+}
+function closeSearch(restore=true){
+  const overlay=document.getElementById('search-overlay');if(overlay.hidden)return;
+  overlay.hidden=true;document.body.classList.remove('search-open');
+  if(restore&&searchReturnFocus?.isConnected)searchReturnFocus.focus();
+  searchReturnFocus=null;
+}
+function renderSearch(q){
+  const box=document.getElementById('search-results');box.replaceChildren();
+  const matches=sections.filter(([label,key])=>!accountPages[key]&&(label+' '+key).toLowerCase().includes(q.toLowerCase())).slice(0,15);
+  if(!matches.length){box.textContent='No matching modules';return}
+  matches.forEach(([label,key])=>{
+    const button=document.createElement('button');
+    button.type='button';button.className='search-result';button.textContent=label;
+    button.onclick=()=>{closeSearch(false);show(key)};box.appendChild(button);
+  });
+}
+function show(requested,{historyMode='push'}={}){
+  const name=window.DizzyRoutes.normalize(requested),valid=sections.find(([,key])=>key===name);
+  if(accountPages[name])accountView(name);
+  else{
+    title.textContent=valid[0];
+    subtitle.textContent=name==='Dashboard'?'Your centralized workspace for bookings, performers, finance and operations.':'Manage '+valid[0].toLowerCase()+' in the DizzyOps workspace.';
+    if(name==='Dashboard')view.innerHTML=dashboardView();
+    else if(name==='FollowUp')view.innerHTML=followUpView();
+    else if(name==='Integrations'&&window.DizzySage)window.DizzySage.render();
+    else if(window.DizzyRoutes.isFinance(name)&&window.DizzyRoutes.canRenderFinance(verifiedStaff,window.DIZZYOPS_AUTH_CONFIG?.identityPlatform?.enabled)){
+      if(name==='Quotes'&&window.DizzyQuotes)window.DizzyQuotes.render();
+      else if(window.DizzyFinance)window.DizzyFinance.render(name);
+      else{view.innerHTML=moduleView(name,valid[0]);wireModule(name)}
+      window.DizzySage?.attach(name);
+    }else{view.innerHTML=moduleView(name,valid[0]);wireModule(name)}
+  }
+  document.querySelectorAll('[data-page]').forEach(button=>{
+    const active=button.dataset.page===name;button.classList.toggle('active',active);
+    if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
+  });
+  if(!document.getElementById('search-overlay').hidden)closeSearch(false);
+  closeSidebar();closeAccountMenu();
+  const target=window.DizzyRoutes.hashFor(name);
+  if(historyMode!=='none'&&window.location.hash!==target){
+    if(historyMode==='replace')window.history.replaceState(null,'',target);
+    else window.history.pushState(null,'',target);
+  }
+}
+const groups=window.DizzyRoutes.groups;
+groups.forEach(([heading,keys])=>{
+  const h=document.createElement('div');h.className='nav-heading';h.textContent=heading;nav.appendChild(h);
+  keys.forEach(key=>{const label=sections.find(s=>s[1]===key)?.[0];if(!label)return;
+    const button=document.createElement('button');button.type='button';button.textContent=label;button.dataset.page=key;
+    button.onclick=()=>show(key);nav.appendChild(button);
+  });
+});
+const bottomNav=document.getElementById('bottom-nav'),menuButton=document.getElementById('menu'),
+  backdrop=document.getElementById('sidebar-backdrop');
+let moreButton=null;
+[['Home','Dashboard'],['Jobs','Jobs'],['Follow-ups','FollowUp'],['More','More']].forEach(([label,key])=>{
+  const button=document.createElement('button');button.type='button';button.textContent=label;button.dataset.page=key;
+  if(key==='More'){moreButton=button;button.setAttribute('aria-controls','sidebar');button.setAttribute('aria-expanded','false')}
+  button.onclick=()=>key==='More'?(sidebar.classList.contains('open')?closeSidebar(true):openSidebar()):show(key);
+  bottomNav.appendChild(button);
+});
+function closeSidebar(restoreFocus=false){
+  const wasOpen=sidebar.classList.contains('open');sidebar.classList.remove('open');
+  menuButton.setAttribute('aria-expanded','false');moreButton?.setAttribute('aria-expanded','false');
+  backdrop.hidden=true;document.body.classList.remove('nav-open');
+  if(restoreFocus&&wasOpen)(moreButton||menuButton).focus();
+}
+function openSidebar(){
+  if(!window.matchMedia('(max-width:650px)').matches)return;
+  sidebar.classList.add('open');menuButton.setAttribute('aria-expanded','true');
+  moreButton?.setAttribute('aria-expanded','true');backdrop.hidden=false;
+  document.body.classList.add('nav-open');
+  (sidebar.querySelector('[aria-current="page"]')||sidebar.querySelector('button'))?.focus();
+}
+menuButton.addEventListener('click',()=>sidebar.classList.contains('open')?closeSidebar(true):openSidebar());
+backdrop.addEventListener('click',()=>closeSidebar(true));
+window.addEventListener('resize',()=>{if(!window.matchMedia('(max-width:650px)').matches)closeSidebar()});
+const accountTrigger=document.getElementById('account-trigger'),accountMenu=document.getElementById('account-menu');
+function closeAccountMenu(){accountMenu.hidden=true;accountTrigger.setAttribute('aria-expanded','false')}
+function toggleAccountMenu(){accountMenu.hidden=!accountMenu.hidden;
+  accountTrigger.setAttribute('aria-expanded',String(!accountMenu.hidden));
+  if(!accountMenu.hidden)accountMenu.querySelector('[role="menuitem"]')?.focus();
+}
+accountTrigger.addEventListener('click',toggleAccountMenu);
+accountMenu.querySelectorAll('[data-account]').forEach(button=>button.addEventListener('click',()=>show(button.dataset.account)));
+document.addEventListener('click',event=>{if(!event.target.closest('.account-wrap'))closeAccountMenu()});
+document.getElementById('search-close').onclick=()=>closeSearch();
+document.getElementById('search-input').oninput=event=>renderSearch(event.target.value);
+document.getElementById('search-overlay').onclick=event=>{if(event.target.id==='search-overlay')closeSearch()};
+function trapTab(event,container){
+  const elements=[...container.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex="0"]')]
+    .filter(el=>!el.hidden&&el.getClientRects().length>0);
+  if(!elements.length){event.preventDefault();container.focus();return}
+  const first=elements[0],last=elements[elements.length-1];
+  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+}
+document.addEventListener('keydown',event=>{
+  if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){event.preventDefault();openSearch();return}
+  if(event.key==='Escape'){
+    if(!document.getElementById('search-overlay').hidden){event.preventDefault();closeSearch();return}
+    if(sidebar.classList.contains('open')){event.preventDefault();closeSidebar(true);return}
+    if(!accountMenu.hidden){event.preventDefault();closeAccountMenu();accountTrigger.focus()}
+  }
+  if(event.key==='Tab'){
+    if(!document.getElementById('search-overlay').hidden)trapTab(event,document.querySelector('.search-panel'));
+    else if(sidebar.classList.contains('open'))trapTab(event,sidebar);
+    else if(!accountMenu.hidden)trapTab(event,accountMenu);
+  }
+});
+function restoreRoute(){show(window.DizzyRoutes.fromHash(window.location.hash),{historyMode:'none'})}
+window.addEventListener('popstate',restoreRoute);
+window.addEventListener('hashchange',restoreRoute);
+show(window.DizzyRoutes.fromHash(window.location.hash),{historyMode:'replace'});
+window.DizzyNavigation=Object.freeze({show});
 
 
 // A preview remains public on GitHub Pages. Cloud Run alone protects real sessions.
@@ -43,7 +165,6 @@ document.addEventListener('click', event => {
   if(target && sections.some(([,key])=>key===target.dataset.go)) show(target.dataset.go);
 });
 
-let verifiedStaff = null;
 const previewAccountView = accountView;
 accountView = function(name) {
   if(verifiedStaff && name==='Profile'){
@@ -87,6 +208,7 @@ if(window.DIZZYOPS_AUTH_CONFIG?.identityPlatform?.enabled === true) {
       verifiedStaff={email:identity.email,role:identity.role};
       document.querySelector('.account-menu .menu-note').textContent=verifiedStaff.email;
       document.querySelector('.account-trigger .avatar').textContent=verifiedStaff.email.slice(0,2).toUpperCase();
+      show(window.DizzyRoutes.fromHash(window.location.hash),{historyMode:'none'});
     })
     .catch(()=>{window.location.replace('/');});
 }
