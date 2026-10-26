@@ -62,9 +62,11 @@ function show(requested,{historyMode='push'}={}){
   else{
     title.textContent=valid[0];
     subtitle.textContent=name==='Dashboard'?'Your centralized workspace for bookings, performers, finance and operations.':'Manage '+valid[0].toLowerCase()+' in the DizzyOps workspace.';
-    if(name==='Dashboard')view.innerHTML=dashboardView();
-    else if(name==='FollowUp')view.innerHTML=followUpView();
+    if(name==='Dashboard'&&window.DizzyOperations)window.DizzyOperations.renderDashboard();
+    else if(name==='Reports'&&window.DizzyOperations)window.DizzyOperations.renderReports();
+    else if(name==='Settings'&&window.DizzyOperations)window.DizzyOperations.renderSettings();
     else if(name==='Integrations'&&window.DizzySage)window.DizzySage.render();
+    else if(window.DizzyOperationsSchema?.schemas?.[name]&&window.DizzyOperations)window.DizzyOperations.render(name,verifiedStaff);
     else if(window.DizzyRoutes.isFinance(name)&&window.DizzyRoutes.canRenderFinance(verifiedStaff,window.DIZZYOPS_AUTH_CONFIG?.identityPlatform?.enabled)){
       if(name==='Quotes'&&window.DizzyQuotes)window.DizzyQuotes.render();
       else if(window.DizzyFinance)window.DizzyFinance.render(name);
