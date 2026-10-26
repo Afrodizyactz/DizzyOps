@@ -1,0 +1,8 @@
+# Build only. No credentials and no deployment of resources.
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-f', 'server/Dockerfile', '-t', '${_REGION}-docker.pkg.dev/${PROJECT_ID}/dizzyops/dizzyops-api:${SHORT_SHA}', '.']
+images:
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/dizzyops/dizzyops-api:${SHORT_SHA}'
+substitutions:
+  _REGION: africa-south1
