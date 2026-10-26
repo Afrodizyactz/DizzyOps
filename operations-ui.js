@@ -111,10 +111,11 @@ function renderEditor(name){
   '<label class="ops-field" for="ops-record-status"><span>Workflow status</span><select id="ops-record-status" name="status">'+
   def.statuses.map(x=>'<option value="'+esc(x)+'"'+(existing?.status===x?' selected':'')+'>'+esc(x)+'</option>').join('')+'</select></label></div>'+
   '<div id="ops-validation" role="status" aria-live="polite"></div>'+
-  '<div class="ops-form-actions"><button type="button" id="ops-validate">Validate details</button>'+
-  (!readOnly&&canWrite(name)?'<button type="submit" class="primary-action">'+(existing?'Save changes':'Create record')+'</button>':
+  '<div class="ops-form-actions">'+(readOnly?'<span class="ops-muted">View only — editing is unavailable.</span>':
+  '<button type="button" id="ops-validate">Validate details</button>'+
+  (canWrite(name)?'<button type="submit" class="primary-action">'+(existing?'Save changes':'Create record')+'</button>':
   '<button type="submit" disabled title="Secure database and role permission required">Save requires backend</button>')+
-  '<button type="reset" id="ops-clear">Clear changes</button></div>'+
+  '<button type="reset" id="ops-clear">Clear changes</button>')+'</div>'+
   '</form></section>';
 }
 function renderWorkflow(name){
@@ -134,9 +135,9 @@ function render(name,identity){
  $('view').innerHTML='<div class="ops-shell">'+pageBanner(name)+
   '<div class="ops-tabs" role="tablist" aria-label="Workspace views">'+
   [['records','Register'],['form','Form'],['workflow','Workflow']].map(([tab,label])=>
-   '<button type="button" role="tab" data-ops-tab="'+tab+'" aria-selected="'+(s.tab===tab)+'"'+
+   '<button type="button" role="tab" id="ops-tab-'+tab+'" aria-controls="ops-content" data-ops-tab="'+tab+'" tabindex="'+(s.tab===tab?'0':'-1')+'" aria-selected="'+(s.tab===tab)+'"'+
    (s.tab===tab?' class="active"':'')+'>'+label+'</button>').join('')+'</div>'+
-  '<div id="ops-content">'+(s.tab==='form'?renderEditor(name):s.tab==='workflow'?renderWorkflow(name):renderRecords(name))+'</div></div>';
+  '<div id="ops-content" role="tabpanel" tabindex="0" aria-labelledby="ops-tab-'+s.tab+'">'+(s.tab='form'?renderEditor(name):s.tab==='workflow'?renderWorkflow(name):renderRecords(name))+'</div></div>';
  bind(name);
  if(isStaff()&&!s.loaded&&!s.loading&&!capPromise)void checkCapabilities().then(()=>{
    if(active!==name)return;
@@ -199,9 +200,24 @@ async function submitForm(name){
 }
 function bind(name){
  const s=getState(name);
- document.querySelectorAll('[data-ops-tab]').forEach(button=>button.addEventListener('click',()=>{
-   s.tab=button.dataset.opsTab;if(s.tab!=='form')s.editing=null;render(name,staff);
- }));
+ document.querySelectorAll('[data-ops-tab]').forEach(button=>{
+   button.addEventListener('click',()=>{
+     s.tab=button.dataset.opsTab;if(s.tab!=='form')s.editing=null;render(name,staff);
+   });
+   button.addEventListener('keydown',event=>{
+     const tabs=['records','form','workflow'],index=tabs.indexOf(button.dataset.opsTab);
+     let next=null;
+     if(event.key==='ArrowRight')next=tabs[(index+1)%tabs.length];
+     if(event.key==='ArrowLeft')next=tabs[(index+tabs.length-1)%tabs.length];
+     if(event.key==='Home')next=tabs[0];
+     if(event.key==='End')next=tabs[tabs.length-1];
+     if(!next)return;
+     event.preventDefault();
+     s.tab=next;if(next!=='form')s.editing=null;
+     render(name,staff);
+     document.getElementById('ops-tab-'+next)?.focus();
+   });
+ });
  if(s.tab==='form'){
   $('ops-back')?.addEventListener('click',()=>{s.tab='records';s.editing=null;render(name,staff)});
   $('ops-validate')?.addEventListener('click',()=>validateForm(name));
