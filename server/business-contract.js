@@ -4,7 +4,7 @@
  */
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
-const {schemas,validate}=require('../../operations-schema.js');
+const {schemas,validate}=require('../operations-schema.js');
 export {schemas};
 const MAX_FIELDS=40;
 const own=(obj,key)=>Object.hasOwn(obj,key);
