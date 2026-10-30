@@ -55,12 +55,16 @@ test('task assignments require staff allowlist and role-compatible record permis
  assert.ok(checkTaskCreation(identity('finance@example.invalid','finance'),valid,allowlist).includes('not permitted'));
 });
 test('staff tasks cannot be listed or changed across assignees without management role',()=>{
- const task={assigneeEmail:'operations@example.invalid',status:'open'};
+ const task={assigneeEmail:'operations@example.invalid',status:'open',relatedModule:'Jobs'};
  assert.equal(canReadTask(identity('operations@example.invalid','operations'),task),true);
  assert.equal(canReadTask(identity('finance@example.invalid','finance'),task),false);
  assert.equal(canReadTask(identity('manager@example.invalid','management'),task),true);
  assert.equal(canReadTask(identity('agent@example.invalid','agent'),task),false);
  assert.equal(canUpdateStatus(identity('finance@example.invalid','finance'),task),false);
+ assert.equal(canReadTask(identity('operations@example.invalid','operations'),
+   {...task,relatedModule:'Documents'}),false);
+ assert.equal(canReadTask(identity('manager@example.invalid','management'),
+   {...task,relatedModule:'Documents'}),true);
 });
 test('task filters, paging and status changes are bounded and revision checked',()=>{
  assert.deepEqual(parseTaskQuery({view:'mine',limit:'20'}),{view:'mine',status:'',limit:20,cursor:''});
