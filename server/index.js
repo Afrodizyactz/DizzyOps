@@ -184,7 +184,7 @@ app.post('/auth/logout',requireSameOrigin,requireCsrf,session,async(req,res)=>{
 });
 app.get('/portal.html',session,(req,res)=>file(res,'portal.html'));
 // Resource code is never an authorization boundary, but serve it only after auth on Cloud Run.
-for(const part of ['portal-app.js','portal-routes.js','portal-ui.css','operations-ui.css','operations-schema.js','operations-ui.js','quotes.js','finance.js','sage-readiness.js']){
+for(const part of ['portal-app.js','portal-routes.js','portal-ui.css','portal-shell.css','portal-shell.js','operations-ui.css','operations-schema.js','operations-ui.js','quotes.js','finance.js','sage-readiness.js']){
   app.get('/'+part,session,(req,res)=>file(res,part));
 }
 // Every business route is gated by the verified SAML staff session.
