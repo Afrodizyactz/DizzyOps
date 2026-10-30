@@ -1,7 +1,7 @@
 /* Shared navigation registry; UI mapping is not an authorization boundary. */
 (function(root){'use strict';
 const sections=Object.freeze([
-['Overview','Dashboard'],['Bookings','Bookings'],['Jobs & Assignments','Jobs'],
+['Overview','Dashboard'],['All applications','Workspaces'],['My workspace','MyWork'],['Bookings','Bookings'],['Jobs & Assignments','Jobs'],
 ['Performers','Performers'],['Clients & CRM','Clients'],['Agents & Suppliers','Partners'],
 ['Quotes','Quotes'],['Invoices & Receipts','Invoices'],['Expenses & Commissions','Expenses'],
 ['Payslips & Statements','Payroll'],['Costumes & Inventory','Inventory'],

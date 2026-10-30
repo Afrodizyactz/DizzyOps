@@ -9,6 +9,8 @@ on:
       - 'portal-app.js'
       - 'portal-routes.js'
       - 'portal-ui.css'
+      - 'portal-shell.js'
+      - 'portal-shell.css'
       - 'operations-ui.css'
       - 'operations-schema.js'
       - 'operations-ui.js'
@@ -29,6 +31,8 @@ on:
       - 'portal-app.js'
       - 'portal-routes.js'
       - 'portal-ui.css'
+      - 'portal-shell.js'
+      - 'portal-shell.css'
       - 'operations-ui.css'
       - 'operations-schema.js'
       - 'operations-ui.js'
@@ -57,6 +61,7 @@ jobs:
           node --check auth/login.js
           node --check auth/identity-platform.js
           node --check portal-app.js
+          node --check portal-shell.js
           node --check portal-routes.js
           node --check quotes.js
           node --check finance.js
@@ -79,3 +84,6 @@ jobs:
 
       - name: Validate Phase 03 business API safety
         run: node --test test/phase-03-safety.test.cjs
+
+      - name: Validate SaaS workspace navigation and privacy
+        run: node --test test/portal-shell.test.cjs
