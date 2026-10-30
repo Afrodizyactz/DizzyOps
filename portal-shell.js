@@ -52,11 +52,12 @@ function permitted(name,role,capabilities,authenticated){
  if(name==='Reports'&&role==='agent')return false;
  const moduleNames=new Set(['Bookings','Jobs','Performers','Clients','Partners','Inventory','Assets','Fabrication','Documents','FollowUp']);
  if(moduleNames.has(name)){
+  // Phase-03 role policy is a ceiling for client navigation, never an override.
+  if(role==='agent')return false;
+  if(role==='finance'&&!['Bookings','Jobs','Clients'].includes(name))return false;
   if(capabilities&&Object.keys(capabilities).length>0&&Object.hasOwn(capabilities,name))
    return capabilities[name]?.read===true;
-  // Mirrors the phase-03 role map only for UX. Backend remains authoritative.
-  if(role==='agent')return false;
-  if(role==='finance')return ['Bookings','Jobs','Clients'].includes(name);
+  // Mirrors the server role policy for UX only; backend authorizes every request.
  }
  return true;
 }
@@ -95,6 +96,7 @@ function createModel(routes,{storage=null,scope='preview'}={}){
   allowed,
   setIdentity(user){
    identity=user&&user.uid&&user.role?{uid:String(user.uid),role:String(user.role)}:null;
+   caps=null; // Never reuse the previous staff session's capability response.
    currentScope=identity?'staff-'+identity.uid:'preview';
    prefs=readPreferences(storage,currentScope,routes);
   },
@@ -177,6 +179,8 @@ function mount({routes,nav,view,subtitle,navigate,storage=null}){
  }
  function refreshChrome(){
   const crumbs=$('workspace-breadcrumb'),pin=$('workspace-pin'),status=$('workspace-status');
+  const copy=$('workspace-copy-link');
+  if(copy)copy.textContent='Copy link';
   if(crumbs){
    crumbs.replaceChildren();
    const home=node('button','Workspace','workspace-crumb');
