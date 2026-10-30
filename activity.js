@@ -145,7 +145,8 @@ function renderRows(){
    label.appendChild(select);
    const btn=action('Save status',async()=>{
     if(select.value===record.status)return;
-    btn.disabled=true;state.message='';state.error='';renderRows();
+    btn.disabled=true;state.message='';state.error='';
+    const status=get('activity-feedback');if(status)status.textContent='Saving task status…';
     try{
      await mutation('/api/v1/activity/tasks/'+encodeURIComponent(record.id)+'/status','PATCH',
        {status:select.value,expectedRevision:record.revision});
@@ -195,7 +196,6 @@ async function showEditor(){
  get('activity-close').onclick=()=>{container.hidden=true;container.replaceChildren()};
  const moduleSelect=get('activity-related-module');
  const options=root.DizzyOperationsSchema?.schemas||{};
- const allowed=(name)=>root.DizzyShell?.createModel?true:true;
  for(const [name,def] of Object.entries(options)){
   if(identity.role==='finance'&&!['Bookings','Jobs','Clients'].includes(name))continue;
   if(identity.role==='operations'&&name==='Documents')continue;
@@ -215,8 +215,8 @@ async function showEditor(){
     const opt=element('option',entry.email+' · '+entry.role);opt.value=entry.email;
     select.appendChild(opt);
    }
-   if(!select.options.length){select.disabled=true;statusBox(get('activity-editor-feedback'),'No approved staff available.','error')}
-  }catch(e){select.disabled=true;statusBox(get('activity-editor-feedback'),e.message,'error')}
+   if(!select.options.length){select.disabled=true;form.querySelector('button[type=submit]').disabled=true;statusBox(get('activity-editor-feedback'),'No approved staff available.','error')}
+  }catch(e){select.disabled=true;form.querySelector('button[type=submit]').disabled=true;statusBox(get('activity-editor-feedback'),e.message,'error')}
  }else{
   const label=element('p','Assigned to your verified staff account: '+identity.email,'activity-self');
   assigneeWrap.appendChild(label);
