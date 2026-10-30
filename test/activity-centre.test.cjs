@@ -35,6 +35,7 @@ test('activity API writes require CSRF+Origin, allowlist, linked record existenc
  assert.match(api,/db\.runTransaction/);
  assert.match(api,/expectedRevision/);
  assert.match(api,/Task access denied/);
+ assert.match(api,/page\.filter\(doc=>canReadTask\(req\.identity,doc\.data\(\)\)\)/);
  assert.doesNotMatch(api,/setInterval|seedTask|demoData|localStorage/);
  const rules=source('firestore.rules');
  assert.match(rules,/allow read, write: if false/);
