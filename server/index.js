@@ -11,6 +11,7 @@ import { initializeApp, applicationDefault } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { createBusinessRouter } from './business-api.js';
+import { createActivityRouter } from './activity-api.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const app = express();
@@ -55,6 +56,7 @@ if(identityEnabled){
 }
 if(businessEnabled&&!identityEnabled)throw Error('Business APIs require verified Identity Platform');
 const db=businessEnabled?getFirestore(firebaseApp,dbId):null;
+const activityEnabled=businessEnabled&&process.env.ACTIVITY_API_ENABLED==='true';
 
 
 app.disable('x-powered-by');
@@ -184,10 +186,13 @@ app.post('/auth/logout',requireSameOrigin,requireCsrf,session,async(req,res)=>{
 });
 app.get('/portal.html',session,(req,res)=>file(res,'portal.html'));
 // Resource code is never an authorization boundary, but serve it only after auth on Cloud Run.
-for(const part of ['portal-app.js','portal-routes.js','portal-ui.css','portal-shell.css','portal-shell.js','operations-ui.css','operations-schema.js','operations-ui.js','quotes.js','finance.js','sage-readiness.js']){
+for(const part of ['portal-app.js','portal-routes.js','portal-ui.css','portal-shell.css','portal-shell.js','activity.js','activity.css','operations-ui.css','operations-schema.js','operations-ui.js','quotes.js','finance.js','sage-readiness.js']){
   app.get('/'+part,session,(req,res)=>file(res,part));
 }
-// Every business route is gated by the verified SAML staff session.
+// Every activity or business API request requires the verified SAML staff session.
+app.use('/api/v1/activity',session,createActivityRouter({
+  db,enabled:activityEnabled,staffAllowlist:allowedRoles,requireSameOrigin,requireCsrf
+}));
 app.use('/api/v1',session,createBusinessRouter({
   db,enabled:businessEnabled,requireSameOrigin,requireCsrf
 }));

@@ -6,6 +6,7 @@ COPY server/package*.json ./server/
 RUN cd server && npm install --omit=dev --no-audit --no-fund && npm cache clean --force
 COPY server/ ./server/
 COPY index.html portal.html portal-app.js portal-routes.js portal-ui.css ./
+COPY portal-shell.js portal-shell.css activity.js activity.css ./
 COPY operations-schema.js operations-ui.js operations-ui.css ./
 COPY quotes.js finance.js sage-readiness.js ./
 COPY assets/ ./assets/

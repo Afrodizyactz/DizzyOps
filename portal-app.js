@@ -86,7 +86,8 @@ function show(requested,{historyMode='push'}={}){
     }
     title.textContent=valid[0];
     subtitle.textContent=name==='Dashboard'?'Your centralized workspace for bookings, performers, finance and operations.':'Manage '+valid[0].toLowerCase()+' in the DizzyOps workspace.';
-    if(name==='Dashboard'&&window.DizzyOperations)window.DizzyOperations.renderDashboard();
+    if(name==='Tasks'&&window.DizzyActivity){subtitle.textContent='Verified staff tasks, related jobs and audited status updates.';void window.DizzyActivity.renderTasks();}
+    else if(name==='Dashboard'&&window.DizzyOperations)window.DizzyOperations.renderDashboard();
     else if(name==='Reports'&&window.DizzyOperations)window.DizzyOperations.renderReports();
     else if(name==='Settings'&&window.DizzyOperations)window.DizzyOperations.renderSettings();
     else if(name==='Integrations'&&window.DizzySage)window.DizzySage.render();
@@ -120,7 +121,7 @@ const shell=window.DizzyShell.mount({
 const bottomNav=document.getElementById('bottom-nav'),menuButton=document.getElementById('menu'),
   backdrop=document.getElementById('sidebar-backdrop');
 let moreButton=null;
-[['Home','Dashboard'],['Jobs','Jobs'],['Follow-ups','FollowUp'],['More','More']].forEach(([label,key])=>{
+[['Home','Dashboard'],['Tasks','Tasks'],['Jobs','Jobs'],['More','More']].forEach(([label,key])=>{
   const button=document.createElement('button');button.type='button';button.textContent=label;button.dataset.page=key;
   if(key==='More'){moreButton=button;button.setAttribute('aria-controls','sidebar');button.setAttribute('aria-expanded','false')}
   button.onclick=()=>key==='More'?(sidebar.classList.contains('open')?closeSidebar(true):openSidebar()):show(key);
@@ -254,6 +255,7 @@ if(window.DIZZYOPS_AUTH_CONFIG?.identityPlatform?.enabled === true) {
       if(!identity?.email||!identity?.role)throw Error('Invalid identity');
       verifiedStaff={uid:identity.uid,email:identity.email,role:identity.role};
       shell.setIdentity(verifiedStaff);
+      window.DizzyActivity?.setIdentity(verifiedStaff);
       fetch('/api/v1/capabilities',{credentials:'same-origin',cache:'no-store'})
         .then(r=>r.ok?r.json():null)
         .then(result=>{if(result?.version===1&&result.modules&&typeof result.modules==='object'){

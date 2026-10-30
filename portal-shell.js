@@ -7,6 +7,7 @@ const MAX_PINS=8,MAX_RECENTS=7;
 const aliases=Object.freeze({
  Dashboard:['overview','home'],Workspaces:['apps','modules','directory'],
  MyWork:['shortcuts','favorites','favourites','recent','my work'],
+ Tasks:['activity','inbox','assignments','approvals','to do','tasks'],
  Bookings:['enquiry','calendar','event'],Jobs:['assignments','production'],
  Performers:['talent','artists','cast'],Clients:['crm','customers','contacts'],
  Partners:['agents','vendors','suppliers'],Quotes:['quotation','estimate'],
@@ -45,6 +46,7 @@ function writePreferences(storage,scope,data){
 }
 function permitted(name,role,capabilities,authenticated){
  if(!authenticated)return true; // Public preview is non-authoritative, data access remains disabled.
+ if(name==='Tasks'&&role==='agent')return false;
  if(adminOnly.has(name)&&role!=='administrator'&&role!=='management')return false;
  if(finance.has(name)&&!['administrator','management','finance'].includes(role))return false;
  if(name==='Integrations'&&!['administrator','management','finance'].includes(role))return false;
@@ -245,10 +247,7 @@ function mount({routes,nav,view,subtitle,navigate,storage=null}){
    '<h2>My workspace</h2><p>Quick links are personal navigation preferences only. No bookings, tasks or client records are stored here.</p></div>'+
    '<section class="panel"><h3>Pinned modules</h3><div id="workspace-my-pins"></div></section>'+
    '<section class="panel"><h3>Recent modules</h3><div id="workspace-my-recent"></div></section>'+
-   '<section class="panel"><h3>Assigned work and notifications</h3>'+
-   '<div class="workspace-no-data"><strong>Not connected to an activity service</strong>'+
-   '<p>Verified task assignments, approvals, reminders and notifications will appear only after authenticated activity APIs are deployed. No artificial task counts are displayed.</p></div>'+
-   '<button type="button" id="workspace-open-jobs">Open Jobs & Assignments</button></section></section>';
+   '<section class="panel"><h3>My assigned tasks</h3><div id="workspace-activity-summary"></div></section></section>';
   function entries(hostId,ids,emptyText){
    const host=$(hostId);host.replaceChildren();
    const allowed=ids.filter(model.allowed);
@@ -269,7 +268,7 @@ function mount({routes,nav,view,subtitle,navigate,storage=null}){
   }
   entries('workspace-my-pins',model.pins,'No pinned modules yet. Open the application directory to pin a module.');
   entries('workspace-my-recent',model.recent,'No recently visited modules on this device.');
-  $('workspace-open-jobs').onclick=()=>go('Jobs');
+  root.DizzyActivity?.renderSummary($('workspace-activity-summary'));
  }
  const pinButton=$('workspace-pin');
  pinButton?.addEventListener('click',()=>{

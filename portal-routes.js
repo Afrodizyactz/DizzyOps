@@ -1,7 +1,7 @@
 /* Shared navigation registry; UI mapping is not an authorization boundary. */
 (function(root){'use strict';
 const sections=Object.freeze([
-['Overview','Dashboard'],['All applications','Workspaces'],['My workspace','MyWork'],['Bookings','Bookings'],['Jobs & Assignments','Jobs'],
+['Overview','Dashboard'],['All applications','Workspaces'],['My workspace','MyWork'],['My Tasks & Activity','Tasks'],['Bookings','Bookings'],['Jobs & Assignments','Jobs'],
 ['Performers','Performers'],['Clients & CRM','Clients'],['Agents & Suppliers','Partners'],
 ['Quotes','Quotes'],['Invoices & Receipts','Invoices'],['Expenses & Commissions','Expenses'],
 ['Payslips & Statements','Payroll'],['Costumes & Inventory','Inventory'],
@@ -11,7 +11,7 @@ const sections=Object.freeze([
 ['Account settings','AccountSettings'],['Log in','Login'],['Help & support','Support'],['Sign out','Signout']
 ]);
 const groups=Object.freeze([
-['WORKSPACE',['Dashboard','Bookings','Jobs','FollowUp']],
+['WORKSPACE',['Dashboard','Tasks','Bookings','Jobs','FollowUp']],
 ['PEOPLE',['Performers','Clients','Partners']],
 ['FINANCE',['Quotes','Invoices','Expenses','Payroll']],
 ['RESOURCES',['Inventory','Assets','Fabrication','Documents']],
