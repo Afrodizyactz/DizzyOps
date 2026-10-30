@@ -59,7 +59,10 @@ export function createActivityRouter({db,enabled,requireSameOrigin,requireCsrf,s
    }
    const snapshot=await query.limit(parsed.limit+1).get();
    const page=snapshot.docs.slice(0,parsed.limit);
-   res.json({items:page.map(doc=>safeTask(doc.data())),
+   // Re-evaluate the current staff role against each task's linked module.
+   // A role downgrade must never expose previously assigned restricted tasks.
+   const visible=page.filter(doc=>canReadTask(req.identity,doc.data()));
+   res.json({items:visible.map(doc=>safeTask(doc.data())),
      nextCursor:snapshot.docs.length>parsed.limit&&page.length?page[page.length-1].id:null});
   }catch(e){
    console.error('Task list failed',e?.code||'unknown');
