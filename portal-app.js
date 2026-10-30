@@ -47,19 +47,36 @@ function closeSearch(restore=true){
   searchReturnFocus=null;
 }
 function renderSearch(q){
-  const box=document.getElementById('search-results');box.replaceChildren();
-  const matches=sections.filter(([label,key])=>!accountPages[key]&&(label+' '+key).toLowerCase().includes(q.toLowerCase())).slice(0,15);
-  if(!matches.length){box.textContent='No matching modules';return}
+  const box=document.getElementById('search-results');
+  box.replaceChildren();
+  const matches=shell.search(q).slice(0,14);
+  if(!matches.length){box.textContent='No matching modules. Try a different page name.';return}
   matches.forEach(([label,key])=>{
     const button=document.createElement('button');
-    button.type='button';button.className='search-result';button.textContent=label;
-    button.onclick=()=>{closeSearch(false);show(key)};box.appendChild(button);
+    button.type='button';button.className='search-result';button.dataset.searchResult=key;
+    const text=document.createElement('span');text.textContent=label;
+    const meta=document.createElement('small');
+    meta.textContent=(shell.model.isPinned(key)?'Pinned · ':'')+shell.model.group(key).toLowerCase();
+    button.append(text,meta);
+    button.onclick=()=>{closeSearch(false);show(key)};
+    box.appendChild(button);
   });
 }
 function show(requested,{historyMode='push'}={}){
-  const name=window.DizzyRoutes.normalize(requested),valid=sections.find(([,key])=>key===name);
+  const requestedName=window.DizzyRoutes.normalize(requested);
+  const name=verifiedStaff&&!shell.canVisit(requestedName)?'Workspaces':requestedName;
+  const valid=sections.find(([,key])=>key===name);
   if(accountPages[name])accountView(name);
   else{
+    title.textContent=valid[0];
+    if(name==='Workspaces'){shell.renderWorkspaces();shell.setActive(name);closeSidebar();closeAccountMenu();if(!document.getElementById('search-overlay').hidden)closeSearch(false);
+      if(historyMode!=='none'&&window.location.hash!==window.DizzyRoutes.hashFor(name))window.history[historyMode==='replace'?'replaceState':'pushState'](null,'',window.DizzyRoutes.hashFor(name));
+      return;
+    }
+    if(name==='MyWork'){shell.renderMyWork();shell.setActive(name);closeSidebar();closeAccountMenu();if(!document.getElementById('search-overlay').hidden)closeSearch(false);
+      if(historyMode!=='none'&&window.location.hash!==window.DizzyRoutes.hashFor(name))window.history[historyMode==='replace'?'replaceState':'pushState'](null,'',window.DizzyRoutes.hashFor(name));
+      return;
+    }
     title.textContent=valid[0];
     subtitle.textContent=name==='Dashboard'?'Your centralized workspace for bookings, performers, finance and operations.':'Manage '+valid[0].toLowerCase()+' in the DizzyOps workspace.';
     if(name==='Dashboard'&&window.DizzyOperations)window.DizzyOperations.renderDashboard();
@@ -74,6 +91,7 @@ function show(requested,{historyMode='push'}={}){
       window.DizzySage?.attach(name);
     }else{view.innerHTML=moduleView(name,valid[0]);wireModule(name)}
   }
+  shell.setActive(name);
   document.querySelectorAll('[data-page]').forEach(button=>{
     const active=button.dataset.page===name;button.classList.toggle('active',active);
     if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
@@ -86,13 +104,11 @@ function show(requested,{historyMode='push'}={}){
     else window.history.pushState(null,'',target);
   }
 }
-const groups=window.DizzyRoutes.groups;
-groups.forEach(([heading,keys])=>{
-  const h=document.createElement('div');h.className='nav-heading';h.textContent=heading;nav.appendChild(h);
-  keys.forEach(key=>{const label=sections.find(s=>s[1]===key)?.[0];if(!label)return;
-    const button=document.createElement('button');button.type='button';button.textContent=label;button.dataset.page=key;
-    button.onclick=()=>show(key);nav.appendChild(button);
-  });
+const shell=window.DizzyShell.mount({
+  routes:window.DizzyRoutes,
+  nav,view,subtitle,
+  navigate:key=>show(key),
+  storage:(()=>{try{return window.localStorage}catch{return null}})()
 });
 const bottomNav=document.getElementById('bottom-nav'),menuButton=document.getElementById('menu'),
   backdrop=document.getElementById('sidebar-backdrop');
@@ -130,6 +146,25 @@ accountMenu.querySelectorAll('[data-account]').forEach(button=>button.addEventLi
 document.addEventListener('click',event=>{if(!event.target.closest('.account-wrap'))closeAccountMenu()});
 document.getElementById('search-close').onclick=()=>closeSearch();
 document.getElementById('search-input').oninput=event=>renderSearch(event.target.value);
+document.getElementById('search-input').addEventListener('keydown',event=>{
+  if(event.key==='ArrowDown'){
+    const first=document.querySelector('#search-results .search-result');
+    if(first){event.preventDefault();first.focus()}
+  }
+  if(event.key==='Enter'){
+    const first=document.querySelector('#search-results .search-result');
+    if(first){event.preventDefault();first.click()}
+  }
+});
+document.getElementById('search-results').addEventListener('keydown',event=>{
+  if(!['ArrowDown','ArrowUp'].includes(event.key))return;
+  const results=[...document.querySelectorAll('#search-results .search-result')];
+  const index=results.indexOf(document.activeElement);if(index<0)return;
+  event.preventDefault();
+  const next=event.key==='ArrowDown'?index+1:index-1;
+  if(next<0)document.getElementById('search-input').focus();
+  else results[Math.min(results.length-1,next)]?.focus();
+});
 document.getElementById('search-overlay').onclick=event=>{if(event.target.id==='search-overlay')closeSearch()};
 function trapTab(event,container){
   const elements=[...container.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex="0"]')]
@@ -141,6 +176,9 @@ function trapTab(event,container){
 }
 document.addEventListener('keydown',event=>{
   if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){event.preventDefault();openSearch();return}
+  if(event.key==='/'&&!event.ctrlKey&&!event.altKey&&!event.metaKey&&
+    !event.target.closest('input,textarea,select,[contenteditable="true"]')&&
+    document.getElementById('search-overlay').hidden){event.preventDefault();openSearch();return}
   if(event.key==='Escape'){
     if(!document.getElementById('search-overlay').hidden){event.preventDefault();closeSearch();return}
     if(sidebar.classList.contains('open')){event.preventDefault();closeSidebar(true);return}
@@ -156,7 +194,7 @@ function restoreRoute(){show(window.DizzyRoutes.fromHash(window.location.hash),{
 window.addEventListener('popstate',restoreRoute);
 window.addEventListener('hashchange',restoreRoute);
 show(window.DizzyRoutes.fromHash(window.location.hash),{historyMode:'replace'});
-window.DizzyNavigation=Object.freeze({show});
+window.DizzyNavigation=Object.freeze({show,openSearch});
 
 
 // A preview remains public on GitHub Pages. Cloud Run alone protects real sessions.
@@ -207,7 +245,14 @@ if(window.DIZZYOPS_AUTH_CONFIG?.identityPlatform?.enabled === true) {
     .then(response=>{if(!response.ok)throw Error('Unauthorized');return response.json();})
     .then(identity=>{
       if(!identity?.email||!identity?.role)throw Error('Invalid identity');
-      verifiedStaff={email:identity.email,role:identity.role};
+      verifiedStaff={uid:identity.uid,email:identity.email,role:identity.role};
+      shell.setIdentity(verifiedStaff);
+      fetch('/api/v1/capabilities',{credentials:'same-origin',cache:'no-store'})
+        .then(r=>r.ok?r.json():null)
+        .then(result=>{if(result?.version===1&&result.modules&&typeof result.modules==='object'){
+          shell.setCapabilities(result.modules);
+          show(window.DizzyRoutes.fromHash(window.location.hash),{historyMode:'none'});
+        }}).catch(()=>{});
       document.querySelector('.account-menu .menu-note').textContent=verifiedStaff.email;
       document.querySelector('.account-trigger .avatar').textContent=verifiedStaff.email.slice(0,2).toUpperCase();
       show(window.DizzyRoutes.fromHash(window.location.hash),{historyMode:'none'});
