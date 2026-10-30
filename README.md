@@ -27,3 +27,7 @@ DizzyOps now includes a shared route registry, improved responsive mobile naviga
 ## Phase 02 — operational workspaces
 
 Operational modules now have structured forms and validation rules, workflow checklists, search/status/sort controls, responsive empty registers, read-only verified metrics, and secure API wiring prepared for a future backend. No seeded customers, performers, bookings or other business records are included. **No records are saved while the backend is absent**; modules show explicit status messaging. The existing staff session boundary and role checks remain unchanged. See [Phase 02 implementation details](docs/phase-02-business-modules.md).
+
+## Phase 03 — secure backend preparation (not activated)
+
+The repository contains a default-off Cloud Run + Google Identity Platform + Firestore API foundation for the ten operational modules, with authenticated staff-only CRUD, explicit role policy, audit events and optimistic concurrency. No Google Cloud project or billable service has been provisioned, and no live records are stored until an approved admin deployment. The public GitHub Pages portal remains a **design-only preview**. Follow the [Phase 03 operator runbook](docs/phase-03-cloud-runbook.md) for permissions, SAML setup, billing, deployment and go-live tests. Do not commit staff account lists or credentials.

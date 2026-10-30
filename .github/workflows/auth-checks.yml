@@ -12,6 +12,10 @@ on:
       - 'operations-ui.css'
       - 'operations-schema.js'
       - 'operations-ui.js'
+      - 'firestore.rules'
+      - 'firestore.indexes.json'
+      - 'firebase.json'
+      - 'infra/**'
       - 'quotes.js'
       - 'finance.js'
       - 'sage-readiness.js'
@@ -28,6 +32,10 @@ on:
       - 'operations-ui.css'
       - 'operations-schema.js'
       - 'operations-ui.js'
+      - 'firestore.rules'
+      - 'firestore.indexes.json'
+      - 'firebase.json'
+      - 'infra/**'
       - 'quotes.js'
       - 'finance.js'
       - 'sage-readiness.js'
@@ -55,6 +63,11 @@ jobs:
           node --check sage-readiness.js
           node --check operations-schema.js
           node --check operations-ui.js
+          node --check server/business-policy.js
+          node --check server/business-contract.js
+          node --check server/business-api.js
+          bash -n infra/prepare-cloud.sh
+          bash -n infra/deploy-cloud-run.sh
       - name: Verify certificate and fail-closed auth settings
         run: npm test --prefix server
 
@@ -63,3 +76,6 @@ jobs:
 
       - name: Validate operational schemas and backend safety gates
         run: node --test test/operational-workspaces.test.cjs
+
+      - name: Validate Phase 03 business API safety
+        run: node --test test/phase-03-safety.test.cjs
