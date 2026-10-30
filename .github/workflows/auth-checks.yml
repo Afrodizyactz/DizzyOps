@@ -11,6 +11,8 @@ on:
       - 'portal-ui.css'
       - 'portal-shell.js'
       - 'portal-shell.css'
+      - 'activity.js'
+      - 'activity.css'
       - 'operations-ui.css'
       - 'operations-schema.js'
       - 'operations-ui.js'
@@ -33,6 +35,8 @@ on:
       - 'portal-ui.css'
       - 'portal-shell.js'
       - 'portal-shell.css'
+      - 'activity.js'
+      - 'activity.css'
       - 'operations-ui.css'
       - 'operations-schema.js'
       - 'operations-ui.js'
@@ -62,6 +66,9 @@ jobs:
           node --check auth/identity-platform.js
           node --check portal-app.js
           node --check portal-shell.js
+          node --check activity.js
+          node --check server/activity-contract.js
+          node --check server/activity-api.js
           node --check portal-routes.js
           node --check quotes.js
           node --check finance.js
@@ -87,3 +94,6 @@ jobs:
 
       - name: Validate SaaS workspace navigation and privacy
         run: node --test test/portal-shell.test.cjs
+
+      - name: Validate staff task contracts and frontend integration
+        run: node --test test/activity-centre.test.cjs
