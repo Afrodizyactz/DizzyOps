@@ -37,3 +37,7 @@ The repository contains a default-off Cloud Run + Google Identity Platform + Fir
 The portal includes an application directory (`#workspaces`), personal shortcuts/recent modules (`#mywork`), collapsible navigation categories, contextual breadcrumbs, per-page pinning and a keyboard command search (Ctrl/⌘+K or /). Saved navigation preferences contain allowlisted **module IDs only**, scoped to each verified staff user; they do not store customer data or grant business API access. Unauthorized routes remain protected by Cloud Run and server-side permission checks.
 
 The public GitHub Pages deployment remains a **design preview** without live business data. Assigned tasks and notifications are *not connected*: see [Phase 04 implementation and acceptance plan](docs/phase-04-saas-navigation.md). Production SAML, Firestore and SaaS data services require separate administrator activation and validation.
+
+## Phase 05 — Staff Tasks & Activity
+
+A zero-seed **My Tasks & Activity** page (`#tasks`) and real task summary under `#mywork` now support approved staff assignments, linked operational records, status transitions, pagination and append-only audit events. Activation is controlled by `ACTIVITY_API_ENABLED=false` by default and requires production Google Workspace SAML, Firestore and authenticated business APIs. The public GitHub Pages preview does **not** create or display real tasks. See [Phase 05 acceptance and security checklist](docs/phase-05-activity-centre.md).
