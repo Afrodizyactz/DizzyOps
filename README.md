@@ -31,3 +31,9 @@ Operational modules now have structured forms and validation rules, workflow che
 ## Phase 03 — secure backend preparation (not activated)
 
 The repository contains a default-off Cloud Run + Google Identity Platform + Firestore API foundation for the ten operational modules, with authenticated staff-only CRUD, explicit role policy, audit events and optimistic concurrency. No Google Cloud project or billable service has been provisioned, and no live records are stored until an approved admin deployment. The public GitHub Pages portal remains a **design-only preview**. Follow the [Phase 03 operator runbook](docs/phase-03-cloud-runbook.md) for permissions, SAML setup, billing, deployment and go-live tests. Do not commit staff account lists or credentials.
+
+## Phase 04 — SaaS workspace navigation
+
+The portal includes an application directory (`#workspaces`), personal shortcuts/recent modules (`#mywork`), collapsible navigation categories, contextual breadcrumbs, per-page pinning and a keyboard command search (Ctrl/⌘+K or /). Saved navigation preferences contain allowlisted **module IDs only**, scoped to each verified staff user; they do not store customer data or grant business API access. Unauthorized routes remain protected by Cloud Run and server-side permission checks.
+
+The public GitHub Pages deployment remains a **design preview** without live business data. Assigned tasks and notifications are *not connected*: see [Phase 04 implementation and acceptance plan](docs/phase-04-saas-navigation.md). Production SAML, Firestore and SaaS data services require separate administrator activation and validation.
