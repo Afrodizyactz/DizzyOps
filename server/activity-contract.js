@@ -53,6 +53,7 @@ export function checkTaskCreation(actor,data,staffAllowlist){
 }
 export function canReadTask(actor,record){
  return taskCapabilities(actor?.role,true).read&&
+ TASK_MODULES.includes(record?.relatedModule)&&permissions(actor.role,record.relatedModule).read&&
  (managerRoles.has(actor.role)||record?.assigneeEmail===actor.email?.toLowerCase());
 }
 export function canUpdateStatus(actor,record){
