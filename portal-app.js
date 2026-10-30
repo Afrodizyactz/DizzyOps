@@ -66,6 +66,13 @@ function show(requested,{historyMode='push'}={}){
   const requestedName=window.DizzyRoutes.normalize(requested);
   const name=verifiedStaff&&!shell.canVisit(requestedName)?'Workspaces':requestedName;
   const valid=sections.find(([,key])=>key===name);
+  // The public preview stays read-only; the protected host waits for server confirmation.
+  if(window.DIZZYOPS_AUTH_CONFIG?.identityPlatform?.enabled===true&&!verifiedStaff){
+    title.textContent='Verifying staff session';
+    subtitle.textContent='Checking Google Workspace authorization before opening private modules.';
+    view.innerHTML='<section class="panel" role="status"><h2>Verifying access</h2><p>No private records will be shown until the server confirms your approved staff identity.</p></section>';
+    return;
+  }
   if(accountPages[name])accountView(name);
   else{
     title.textContent=valid[0];
@@ -177,7 +184,7 @@ function trapTab(event,container){
 document.addEventListener('keydown',event=>{
   if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){event.preventDefault();openSearch();return}
   if(event.key==='/'&&!event.ctrlKey&&!event.altKey&&!event.metaKey&&
-    !event.target.closest('input,textarea,select,[contenteditable="true"]')&&
+    !event.target?.closest?.('input,textarea,select,[contenteditable="true"]')&&
     document.getElementById('search-overlay').hidden){event.preventDefault();openSearch();return}
   if(event.key==='Escape'){
     if(!document.getElementById('search-overlay').hidden){event.preventDefault();closeSearch();return}
