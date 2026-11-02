@@ -1,9 +1,9 @@
 # DizzyOps — Google Workspace SAML 2.0 single sign-on
 
-## Status (25 October 2026)
+## Status (2 November 2026)
 **IdP settings staged; authentication NOT deployed or enabled.** The GitHub Pages application is a public preview. A SAML assertion cannot be validated or used as an authenticated session solely by `index.html`. Until the production backend or managed identity platform is deployed, neither the client interface nor its navigation is an access-control boundary. Do not connect sensitive records or production APIs to this preview.
 
-## Google Workspace IdP settings — verified certificate
+## Google Workspace IdP settings — verified certificates
 
 | Setting | Value |
 | --- | --- |
@@ -16,10 +16,16 @@
 | Public certificate SHA-256 fingerprint | `CB:D8:53:3B:CA:C5:38:10:BF:B4:6C:49:50:48:47:8B:0C:CA:79:43:33:05:D2:27:DE:07:9D:45:F2:64:23:63` |
 | Certificate valid from | 2026-10-24T22:51:50Z |
 | Certificate valid until | 2031-10-23T22:51:50Z |
+| Additional public signing certificate | `auth/google-idp-signing-2026-11.pem` |
+| Additional SHA-256 fingerprint | `77:2D:7E:39:ED:AE:CE:60:9C:9A:2E:7F:8F:E1:F8:3B:6D:35:6B:15:EF:A4:75:BD:99:F5:F4:25:A9:F1:CE:06` |
+| Additional certificate valid from | 2026-11-02T00:28:12Z |
+| Additional certificate valid until | 2031-11-01T00:28:12Z |
 
-The original uploaded `GoogleIDPMetadata.xml` carries an **expired 11 March 2026 certificate**. Do not import that old XML as the live IdP metadata. The `auth/google-idp-metadata.xml` file in this feature branch contains the replacement public certificate. The metadata was reconstructed from the supplied SSO URL, IdP issuer, and certificate; confirm these IdP details in the Google Admin console before production use.
+The original uploaded `GoogleIDPMetadata.xml` carries an **expired 11 March 2026 certificate**. Do not import that old XML as the live IdP metadata. The `auth/google-idp-metadata.xml` file in this feature branch contains the replacement public certificate. The metadata was reconstructed from the supplied SSO URL, IdP issuer, and both certificates. The issuer, SSO URL and first certificate were checked in the customer Admin console on 2 November 2026. The additional certificate was supplied by the administrator and its encoded fingerprint, validity and self-signature were validated. Confirm the certificate selected for the custom SAML app when that app is created.
 
 This is an X.509 *public certificate*, not a private key. Publishing the public IdP signing certificate is acceptable; private keys and session secrets must stay in managed secret storage.
+
+Both public certificates are included as signing keys in `auth/google-idp-metadata.xml` and the `signing_certificates` array in `auth/idp-settings.json`. The older scalar certificate fields remain for compatibility and describe certificate 1 only. Use the array when configuring provider trust. Keep both certificates during rollover; do not delete a certificate still selected by an existing SAML app.
 
 ## Service provider (SP) configuration remains required
 

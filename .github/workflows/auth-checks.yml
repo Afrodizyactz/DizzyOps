@@ -62,6 +62,8 @@ jobs:
       - name: Parse authentication and portal scripts
         run: |
           node --check server/index.js
+          node --check server/saml-config.js
+          node --check infra/configure-saml.mjs
           node --check auth/login.js
           node --check auth/identity-platform.js
           node --check portal-app.js

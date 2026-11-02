@@ -9,5 +9,19 @@
   "certificate_not_after": "2031-10-23T22:51:50Z",
   "service_provider_entity_id": null,
   "assertion_consumer_service_url": null,
-  "status": "awaiting service provider setup; not enabled"
+  "status": "awaiting service provider setup; not enabled",
+  "signing_certificates": [
+    {
+      "file": "./google-idp-signing-2026.pem",
+      "sha256": "CB:D8:53:3B:CA:C5:38:10:BF:B4:6C:49:50:48:47:8B:0C:CA:79:43:33:05:D2:27:DE:07:9D:45:F2:64:23:63",
+      "not_before": "2026-10-24T22:51:50Z",
+      "not_after": "2031-10-23T22:51:50Z"
+    },
+    {
+      "file": "./google-idp-signing-2026-11.pem",
+      "sha256": "77:2D:7E:39:ED:AE:CE:60:9C:9A:2E:7F:8F:E1:F8:3B:6D:35:6B:15:EF:A4:75:BD:99:F5:F4:25:A9:F1:CE:06",
+      "not_before": "2026-11-02T00:28:12Z",
+      "not_after": "2031-11-01T00:28:12Z"
+    }
+  ]
 }
