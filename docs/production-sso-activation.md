@@ -21,7 +21,7 @@
    - Display name: `AfrodizzyActs Google Workspace`
    - IdP entity ID: `https://accounts.google.com/o/saml2?idpid=C03icveqq`
    - IdP SSO: `https://accounts.google.com/o/saml2/idp?idpid=C03icveqq`
-   - IdP public signing certificate: `auth/google-idp-signing-2026.pem`
+   - IdP public signing certificates: `auth/google-idp-signing-2026.pem` and `auth/google-idp-signing-2026-11.pem` (trust both during rollover)
    - SP Entity ID: planned `https://ops.afrodizzyacts.co.za` — use **exactly** the same value in Google Workspace.
 4. **Copy the actual ACS / Authorization Callback URL from Identity Platform.** The exact URL depends on the project and auth domain. Do not use the GitHub Pages URL as ACS.
 5. Add `ops.afrodizzyacts.co.za` to authorized domains. For redirect sign-in on Safari/mobile, configure an approved first-party authentication domain/proxy arrangement as described in [Firebase redirect best practices](https://firebase.google.com/docs/auth/web/redirect-best-practices). Avoid relying on third-party cookie access.
@@ -35,7 +35,56 @@ In [Google Admin console](https://admin.google.com) go to **Apps → Web and mob
 - Start URL = `https://ops.afrodizzyacts.co.za/`.
 - NameID format = **email address**, NameID = **Primary email**.
 - Enable only for the approved staff OU or group (14 users); enforce MFA through Workspace policy.
-- Use current IdP public cert, fingerprint **CB:D8:53:3B:CA:C5:38:10:BF:B4:6C:49:50:48:47:8B:0C:CA:79:43:33:05:D2:27:DE:07:9D:45:F2:64:23:63**, valid 24 Oct 2026–23 Oct 2031 UTC. Do not import the uploaded expired 2026 XML metadata.
+- Select one of the current IdP certificates for this app and keep both certificates in Identity Platform's trust set. Certificate 1 fingerprint: **CB:D8:53:3B:CA:C5:38:10:BF:B4:6C:49:50:48:47:8B:0C:CA:79:43:33:05:D2:27:DE:07:9D:45:F2:64:23:63**, valid 24 Oct 2026–23 Oct 2031 UTC. Certificate 2 fingerprint: **77:2D:7E:39:ED:AE:CE:60:9C:9A:2E:7F:8F:E1:F8:3B:6D:35:6B:15:EF:A4:75:BD:99:F5:F4:25:A9:F1:CE:06**, valid 2 Nov 2026–1 Nov 2031 UTC. Do not import the uploaded expired 2026 XML metadata.
+
+## Repeatable provider setup
+
+The customer Admin console currently shows **Apps (0)**. Organization-wide SAML
+certificates do not register a DizzyOps application. A cloud project, managed
+service provider, Workspace app and deployed session backend are still required.
+
+After selecting the real AfrodizzyActs project, generate an offline plan from the
+repository root (replace the project argument with the actual ID):
+
+```bash
+node infra/configure-saml.mjs --project YOUR_PROJECT_ID
+```
+
+The plan contains public provider settings and Workspace field values. It labels
+the callback as **planned**, not provisioned. It performs no network calls and
+does not create a cloud project, attach billing, enable APIs or activate login.
+
+Once Identity Platform is enabled in that project, install the server's declared
+dependencies and use Application Default Credentials from an authorized Google
+Cloud administrator (for example, Cloud Shell's existing credentials):
+
+```bash
+npm install --prefix server
+node infra/configure-saml.mjs --project YOUR_PROJECT_ID --apply
+node infra/configure-saml.mjs --project YOUR_PROJECT_ID --check
+```
+
+- New SAML providers are created **disabled**. Complete the Workspace app and
+  deployment setup before enabling the provider in Identity Platform.
+- Existing providers retain their enabled state; only missing approved
+  certificates are patched. Existing issuer, SSO URL, SP entity ID and callback
+  must match. An unexpected trusted certificate or destination mismatch stops
+  the command for operator review.
+- The command validates both pinned fingerprints, validity dates and public
+  certificates. Permission errors stop the operation; they never cause a
+  fallback creation in another project.
+- Use the callback returned by a successful cloud operation in Workspace.
+  Add the production hostname to Identity Platform's authorized domains and
+  confirm NameID = Primary email / EMAIL. Create the custom SAML app under
+  **Apps → Web and mobile apps → Add app → Add custom SAML app**.
+- Set the private staff email-to-role map before activation. The intended
+  14 accounts must be explicitly approved; an email domain match grants no access.
+- Existing custom auth-domain providers require separate verification; this
+  helper deliberately uses the project's default Firebase auth domain. The
+  existing redirect best-practice requirement still applies on iOS/Safari.
+
+A successful `--check` confirms provider configuration only. It is not evidence
+of a successful login, live callback, Workspace assignment or deployed backend.
 
 ## 3. Deploy Cloud Run and route domain
 
